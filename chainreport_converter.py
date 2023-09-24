@@ -6,7 +6,7 @@ from datetime import datetime
 
 # Parse Input
 parser = argparse.ArgumentParser(description='ChainReport converter')
-parser.add_argument('exchange_type', 
+parser.add_argument('exchange_type',
                     help='''Name of a supported exchange/blockchain, currently -
                     Name einer unterstützen Exchange/Blockchain, aktuell:
                     - HI ''')
