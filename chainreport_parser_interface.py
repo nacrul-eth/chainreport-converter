@@ -29,51 +29,51 @@ class ChainreportParserInterface(metaclass=abc.ABCMeta):
                 NotImplemented)
 
     @abc.abstractmethod
-    def get_date_string(self, date:str):
+    def get_date_string(self):
         """Return datestring in Chainreport format"""   
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_transaction_type(self, transaction_type:str):
+    def get_transaction_type(self):
         """Return transaction type in Chainreport format"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_received_amount(self, received_amount:str):
+    def get_received_amount(self):
         """Return amount of received coins"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_received_currency(self, receveid_currency:str):
+    def get_received_currency(self):
         """Return currency of receveid coins"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_sent_amount(self, sent_amount:str):
+    def get_sent_amount(self):
         """Return amount of sent coins"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_sent_currency(self, sent_currency:str):
+    def get_sent_currency(self):
         """Return currency of sent coins"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_transaction_fee_amount(self, fee_amount:str):
+    def get_transaction_fee_amount(self):
         """Return amount of transaction fee coins"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_transaction_fee_currency(self, fee_currency:str):
+    def get_transaction_fee_currency(self):
         """Return currency of transaction fee coins"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_order_id(self, order_id:str):
+    def get_order_id(self):
         """Return order id of the exchange"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_description(self, description:str):
+    def get_description(self):
         """Return description of the transaction"""
         raise NotImplementedError

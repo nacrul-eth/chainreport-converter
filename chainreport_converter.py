@@ -2,7 +2,7 @@
 
 import csv
 import argparse
-from datetime import datetime
+from hi_parser import HiParser
 
 # Parse Input
 parser = argparse.ArgumentParser(description='ChainReport converter')
@@ -23,39 +23,7 @@ exchange_type = args.exchange_type
 exchange_filename = args.input_file
 chainreport_filename = args.output_file
 
-
-CASHBACKTRANSACTION = ['HI rebate']
-DEPOSITTRANSACTION = ['Crypto deposit',
-                      'crypto receive']
-STAKINGTRANSACTION = ['Crypto staking yields （HI）']
-WITHDRAWTRANSACTION = ['crypto send',
-                       'Crypto withdraw']
-EXCLUSIONSTRINGS = ['Vault HI daily release',
-                   'Crypto earning stake',
-                   'Crypto earning release']
-
-def get_date_string(date):
-    """Function converting the date into the correct format."""
-    transaction_time = datetime.strptime(date, '%Y-%m-%d %H:%M %Z')
-    return transaction_time.strftime('%d.%m.%Y %H:%M')
-
-def get_transactiontype_string(transaction_description):
-    """Function converting the transaction type to the correct string."""
-    if transaction_description in CASHBACKTRANSACTION:
-        return 'Cashback'
-    if transaction_description in STAKINGTRANSACTION:
-        return 'Staking'
-    if transaction_description in DEPOSITTRANSACTION:
-        return 'Deposit'
-    if transaction_description in WITHDRAWTRANSACTION:
-        return 'Withdrawal'
-    return 'ERROR'
-
-def convert_numbers(amount):
-    """Function converting deciaml numbers."""
-    return amount.replace(".", ",")
-
-
+# Main function
 with open (chainreport_filename, 'w', newline='', encoding="utf-8") as csvoutput:
     fieldnames = ['Zeitpunkt', 'Transaktions Typ', 'Anzahl Eingang', 'Währung Eingang',
                   'Anzahl Ausgang', 'Währung Ausgang', 'Transaktionsgebühr',
@@ -66,22 +34,29 @@ with open (chainreport_filename, 'w', newline='', encoding="utf-8") as csvoutput
     with open(exchange_filename, newline='', encoding="utf-8") as csvinput:
         reader = csv.DictReader(csvinput, delimiter=',')
         for row in reader:
-            if row['Description'] not in EXCLUSIONSTRINGS:
-                writer.writerow({'Zeitpunkt': get_date_string(row['Date']),
-                                 'Transaktions Typ': get_transactiontype_string(row['Description']), 
-                                 'Anzahl Eingang': convert_numbers(row['Received Amount']), 
-                                 'Währung Eingang': row['Received Currency'],
-                                 'Währung Ausgang': row['Sent Currency'],
-                                 'Anzahl Ausgang': convert_numbers(row['Sent Amount']),
-                                 'Beschreibung': row['Description']})
-            if row['Description'] in WITHDRAWTRANSACTION:
-                print(({'Zeitpunkt': get_date_string(row['Date']),
-                        'Transaktions Typ': get_transactiontype_string(row['Description']), 
-                        'Anzahl Eingang': convert_numbers(row['Received Amount']), 
-                        'Währung Eingang': row['Received Currency'],
-                        'Währung Ausgang': row['Sent Currency'],
-                        'Anzahl Ausgang': convert_numbers(row['Sent Amount']),
-                        'Beschreibung': row['Description']}))
+            if row['Description'] not in HiParser.EXCLUSIONSTRINGS:
+                rowdata = HiParser(row)
+                writer.writerow({'Zeitpunkt': rowdata.get_date_string(),
+                                 'Transaktions Typ': rowdata.get_transaction_type(), 
+                                 'Anzahl Eingang': rowdata.get_received_amount(), 
+                                 'Währung Eingang': rowdata.get_received_currency(),
+                                 'Anzahl Ausgang': rowdata.get_sent_amount(),
+                                 'Währung Ausgang': rowdata.get_sent_currency(),
+                                 'Transaktionsgebühr': rowdata.get_transaction_fee_amount(),
+                                 'Währung Transaktionsgebühr': rowdata.get_transaction_fee_currency(),
+                                 'Oder-ID der Exchange': rowdata.get_order_id(),
+                                 'Beschreibung': rowdata.get_description()})                
+            if row['Description'] in HiParser.WITHDRAWTRANSACTION:
+                print({'Zeitpunkt': rowdata.get_date_string(),
+                                 'Transaktions Typ': rowdata.get_transaction_type(), 
+                                 'Anzahl Eingang': rowdata.get_received_amount(), 
+                                 'Währung Eingang': rowdata.get_received_currency(),
+                                 'Anzahl Ausgang': rowdata.get_sent_amount(),
+                                 'Währung Ausgang': rowdata.get_sent_currency(),
+                                 'Transaktionsgebühr': rowdata.get_transaction_fee_amount(),
+                                 'Währung Transaktionsgebühr': rowdata.get_transaction_fee_currency(),
+                                 'Oder-ID der Exchange': rowdata.get_order_id(),
+                                 'Beschreibung': rowdata.get_description()})   
 
 csvinput.close()
 csvoutput.close()
