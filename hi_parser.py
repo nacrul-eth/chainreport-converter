@@ -1,3 +1,5 @@
+"""Main Module to parse csv files and create a chainreport compatible version."""
+
 import csv
 import argparse
 from datetime import datetime
@@ -27,36 +29,38 @@ EXCLUSIONSTRINGS = ['Vault HI daily release',
                    'Crypto earning release']
 
 def get_date_string(date):
+    """Function converting the date into the correct format."""
     transaction_time = datetime.strptime(date, '%Y-%m-%d %H:%M %Z')
     return transaction_time.strftime('%d.%m.%Y %H:%M')
 
 def get_transactiontype_string(transaction_description):
+    """Function converting the transaction type to the correct string."""
     if transaction_description in CASHBACKTRANSACTION:
         return 'Cashback'
-    elif transaction_description in STAKINGTRANSACTION:
+    if transaction_description in STAKINGTRANSACTION:
         return 'Staking'
-    elif transaction_description in DEPOSITTRANSACTION:
+    if transaction_description in DEPOSITTRANSACTION:
         return 'Deposit'
-    elif transaction_description in WITHDRAWTRANSACTION:
+    if transaction_description in WITHDRAWTRANSACTION:
         return 'Withdrawal'
-    else:
-        return 'ERROR'
+    return 'ERROR'
 
 def convert_numbers(amount):
+    """Function converting deciaml numbers."""
     return amount.replace(".", ",")
 
 
-with open (hi_chainreport_filename, 'w', newline='') as csvoutput:
+with open (hi_chainreport_filename, 'w', newline='', encoding="utf-8") as csvoutput:
     fieldnames = ['Zeitpunkt', 'Transaktions Typ', 'Anzahl Eingang', 'Währung Eingang',
                   'Anzahl Ausgang', 'Währung Ausgang', 'Transaktionsgebühr',
                   'Währung Transaktionsgebühr', 'Oder-ID der Exchange', 'Beschreibung' ]
     writer = csv.DictWriter(csvoutput, delimiter=';', fieldnames=fieldnames)
     writer.writeheader()
 
-    with open(hi_statement_filename, newline='') as csvinput:
+    with open(hi_statement_filename, newline='', encoding="utf-8") as csvinput:
         reader = csv.DictReader(csvinput, delimiter=',')
         for row in reader:
-            if (row['Description'] not in EXCLUSIONSTRINGS):
+            if row['Description'] not in EXCLUSIONSTRINGS:
                 writer.writerow({'Zeitpunkt': get_date_string(row['Date']),
                                  'Transaktions Typ': get_transactiontype_string(row['Description']), 
                                  'Anzahl Eingang': convert_numbers(row['Received Amount']), 
