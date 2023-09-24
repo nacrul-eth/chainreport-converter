@@ -5,18 +5,24 @@ import argparse
 from datetime import datetime
 
 # Parse Input
-parser = argparse.ArgumentParser(description='Hi to ChainReport converter')
+parser = argparse.ArgumentParser(description='ChainReport converter')
+parser.add_argument('exchange_type', 
+                    help='''Name of a supported exchange/blockchain, currently -
+                    Name einer unterstützen Exchange/Blockchain, aktuell:
+                    - HI ''')
 parser.add_argument('input_file',
-                    help='''The Hi statement filename (full path) -
-                    Der Name für die Hi Statement Datei (vollständiger Pfad)''')
+                    help='''The exchange/blockchain filename (full path) -
+                    Der Name von der Echange/Blockchain Datei (vollständiger Pfad)''')
 parser.add_argument('output_file',
                     help='''The ChainReport filename (full path) -
                     Der Name für die ChainReport Datei (vollständiger Pfad)''')
 args = parser.parse_args()
 
 # Definitions & variables
-hi_statement_filename = args.input_file
-hi_chainreport_filename = args.output_file
+exchange_type = args.exchange_type
+exchange_filename = args.input_file
+chainreport_filename = args.output_file
+
 
 CASHBACKTRANSACTION = ['HI rebate']
 DEPOSITTRANSACTION = ['Crypto deposit',
@@ -50,14 +56,14 @@ def convert_numbers(amount):
     return amount.replace(".", ",")
 
 
-with open (hi_chainreport_filename, 'w', newline='', encoding="utf-8") as csvoutput:
+with open (chainreport_filename, 'w', newline='', encoding="utf-8") as csvoutput:
     fieldnames = ['Zeitpunkt', 'Transaktions Typ', 'Anzahl Eingang', 'Währung Eingang',
                   'Anzahl Ausgang', 'Währung Ausgang', 'Transaktionsgebühr',
                   'Währung Transaktionsgebühr', 'Oder-ID der Exchange', 'Beschreibung' ]
     writer = csv.DictWriter(csvoutput, delimiter=';', fieldnames=fieldnames)
     writer.writeheader()
 
-    with open(hi_statement_filename, newline='', encoding="utf-8") as csvinput:
+    with open(exchange_filename, newline='', encoding="utf-8") as csvinput:
         reader = csv.DictReader(csvinput, delimiter=',')
         for row in reader:
             if row['Description'] not in EXCLUSIONSTRINGS:
