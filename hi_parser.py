@@ -68,11 +68,19 @@ with open (hi_chainreport_filename, 'w', newline='', encoding="utf-8") as csvout
                                  'Währung Ausgang': row['Sent Currency'],
                                  'Anzahl Ausgang': convert_numbers(row['Sent Amount']),
                                  'Beschreibung': row['Description']})
+            if row['Description'] in WITHDRAWTRANSACTION:
+                print(({'Zeitpunkt': get_date_string(row['Date']),
+                        'Transaktions Typ': get_transactiontype_string(row['Description']), 
+                        'Anzahl Eingang': convert_numbers(row['Received Amount']), 
+                        'Währung Eingang': row['Received Currency'],
+                        'Währung Ausgang': row['Sent Currency'],
+                        'Anzahl Ausgang': convert_numbers(row['Sent Amount']),
+                        'Beschreibung': row['Description']}))
 
 csvinput.close()
 csvoutput.close()
 
 print('''----------------------------------------------------------------------
-Please modify all Withdrawal lines in the file. Hi does not show that at all in their export file. - 
-Bitte Prüfe alle Withdrawal Zeilen. Hi zeigt immer einen Wert von 0 an.
+Please modify all Withdrawal lines (see output above) in the file. Hi does not show that at all in their export file. - 
+Bitte Prüfe alle Withdrawal Zeilen (siehe Ausgabe oben). Hi zeigt immer einen Wert von 0 an.
 ----------------------------------------------------------------------''')
