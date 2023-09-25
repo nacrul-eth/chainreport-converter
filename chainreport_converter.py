@@ -2,7 +2,7 @@
 
 import csv
 import argparse
-from parser.hi_parser import HiParser
+from chainreport_parser.hi_parser import HiParser
 
 # Parse Input
 parser = argparse.ArgumentParser(description='ChainReport converter')

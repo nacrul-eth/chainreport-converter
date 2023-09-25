@@ -1,5 +1,5 @@
 # chainreport-converter
-Converter tools for https://chain.report/
+Converter tools for <https://chain.report/>
 
 To create a chainreport csv-file please execute the following command / 
 Um eine chainreport CSV-Datei zu erzeugen, bitte folgenden Befehl ausführen:
@@ -11,4 +11,4 @@ Um eine chainreport CSV-Datei zu erzeugen, bitte folgenden Befehl ausführen:
 Currently the following exchanges/blockchains are supported / 
 Aktuell werden die folgenden Exchanges/Blockchains unterstützt:
 
-- HI
+- HI (<https://hi.com>)
