@@ -1,7 +1,7 @@
 """Parser implementation for HI"""
 
 from datetime import datetime
-from chainreport_parser_interface import ChainreportParserInterface
+from .chainreport_parser_interface import ChainreportParserInterface
 
 class HiParser(ChainreportParserInterface):
     """Extract all required information from Hi statement."""
