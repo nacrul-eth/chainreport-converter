@@ -1,0 +1,73 @@
+#:kivy 1.0.9
+
+<ChainreportConverterTool>: 
+    MainScreen
+
+<MainScreen>:
+    name: "Main Screen"
+    id: main_screen
+    canvas.before:
+        Color:
+            rgba: 0.145, 0.122, 0.408, 1
+        Rectangle: 
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint: 0.8, 0.8
+        pos_hint: {'center_x':.5, 'center_y': .5}
+
+        Image: 
+            source: 'assets/Krypto-Woelfe-Seitlich-Weiss-300x60.png'
+            size: self.texture_size
+            size_hint: 1, 0.4
+
+        GridLayout:
+            id: grid_layout
+            size_hint: 0.8, 0.8
+            columns: 3
+            rows: 2
+            row_force_default: True 
+            row_default_height: 40
+
+            Label:
+                text: "Select Parser"
+
+            Label:
+                text: "Select Input File"
+
+            Label: 
+                text: "Enter Output Filename"
+
+            DropdownButton:
+                id: parser_dropdownbutton 
+                text: "Select Parser"
+                background_color: '#33cccc'
+                on_release: main_screen.set_parser(parser_dropdownbutton.text)
+
+            Button:
+                text: "open"
+                on_release: main_screen.open(filechooser.path, filechooser.selection)
+
+            TextInput:
+                text: "Enter output filename"
+                multiline: False
+                padding_y: 40, 40
+
+        FileChooserListView:
+            id: filechooser
+            on_selection: main_screen.selected(filechooser.selection)
+
+        Button: 
+            text: "Convert File" 
+            size_hint: 0.2, 0.1
+            pos_hint: {'center_x':.5, 'center_y': .5}
+            background_color: '#33cccc'
+            bold: True
+            on_release: main_screen.start_conversion()
+        
+        TextInput:
+            id: logging 
+            text: "..."
+            readonly: True 
