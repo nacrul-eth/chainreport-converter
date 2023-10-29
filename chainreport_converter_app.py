@@ -4,50 +4,79 @@ import os
 
 # kivy dependencies
 from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.boxlayout import BoxLayout
+# pylint: disable=no-name-in-module
+from kivy.properties import ObjectProperty
+from kivy.uix.popup import Popup
 
 # program dependencies
 from chainreport_converter import ChainreportConverter
 
-class MainScreen(Screen):
+class LoadDialog(BoxLayout):
+    """Load screen for the input file"""
+    load = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+
+class SaveDialog(BoxLayout):
+    """Save screen for the chain.report file"""
+    save = ObjectProperty(None)
+    text_input = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+
+class MainWindow(BoxLayout):
     """Main screen for the application"""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.parser = ""
         self.input_file = ""
-        self.local_file_path = ""
         self.output_file = ""
-        self.converter = ""
-
-    def open(self, path, filename):
-        """Store the full filename (including path) in local variable"""
-        if filename:
-            self.input_file = filename[0]
-            self.local_file_path = path
-
-    def selected(self, filename):
-        """Store the selected filename """
-        self.input_file = filename[0]
-        self.log_action("You selected the input file " + self.input_file)
+        self.converter_object = ""
 
     def set_parser(self, parserstring):
         """Set the parser for the conversion"""
         self.parser = parserstring
         self.log_action("You selected the parser: " + self.parser)
 
-    def set_outputfile(self, full_filename_path):
-        """Set the output file"""
-        self.output_file = full_filename_path
+    def dismiss_popup(self):
+        """Close popup"""
+        self._popup.dismiss()
+
+    def show_load(self):
+        """Show the load file screen"""
+        content = LoadDialog(load=self.load, cancel=self.dismiss_popup)
+        self._popup = Popup(title="Load file", content=content,
+                            size_hint=(0.9, 0.9))
+        self._popup.open()
+
+    def show_save(self):
+        """Show the save file screen"""
+        content = SaveDialog(save=self.save, cancel=self.dismiss_popup)
+        self._popup = Popup(title="Save file", content=content,
+                            size_hint=(0.9, 0.9))
+        self._popup.open()
+
+    def load(self, path, filename):
+        """Store the full input filename (including path) in local variable"""
+        self.input_file = os.path.join(path, filename[0])
+        self.log_action("You chose to open the following file: " + self.input_file)
+
+        self.dismiss_popup()
+
+    def save(self, path, filename):
+        """Set the full output filname (including path) in local variable"""
+        self.output_file = os.path.join(path, filename)
         self.log_action("You chose to write to the following file: " + self.output_file)
+
+        self.dismiss_popup()
 
     def start_conversion(self):
         """Start the conversion process, if all parameters are set"""
         if self.parser and self.input_file and self.output_file:
-            self.converter = ChainreportConverter(self.parser, self.input_file, self.output_file)
-            self.log_action("Converting " + os.path.join(self.local_file_path, self.input_file) + " to " +
-                            os.path.join(self.local_file_path, self.output_file) + " using the Parser for " +
+            self.converter_object = ChainreportConverter(self.parser, self.input_file, self.output_file)
+            self.log_action("Converting " + self.input_file + " to " +
+                            self.output_file + " using the Parser for " +
                             self.parser)
-            self.converter.convert()
+            self.converter_object.convert()
             self.log_action("Conversion done!")
         else:
             self.log_action("Please select all input parameters first")
@@ -56,13 +85,8 @@ class MainScreen(Screen):
         """Append text for logging on the GUI"""
         self.ids.logging.text += loggingtext + "\n"
 
-class ChainreportConverterTool(ScreenManager):
-    """Extensible screen manager implementation"""
-
 class ChainreportConverterApp(App):
     """Main application"""
-    def build(self):
-        return ChainreportConverterTool()
 
 if __name__ == '__main__':
     ChainreportConverterApp().run()

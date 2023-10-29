@@ -8,16 +8,12 @@
 # local imports
 #:import DropdownButton widgets.dropdown_button
 
-<ChainreportConverterTool>:
-    MainScreen
-
-<MainScreen>:
-    name: "Main Screen"
-    id: main_screen
+MainWindow:
+    name: "Main Window"
+    id: main_window
     canvas.before:
-        Color:
-            rgba: 0.145, 0.122, 0.408, 1
         Rectangle:
+            source: 'assets/background.jpg'
             pos: self.pos
             size: self.size
 
@@ -25,6 +21,7 @@
         orientation: 'vertical'
         size_hint: 0.8, 0.8
         pos_hint: {'center_x':.5, 'center_y': .5}
+        spacing: 20
 
         Image:
             source: 'assets/Krypto-Woelfe-Seitlich-Weiss-300x60.png'
@@ -38,7 +35,8 @@
             rows: 2
             row_force_default: True
             row_default_height: 40
-            padding: 20
+            spacing: 20,20
+            pos_hint: {'center_x':.5, 'center_y': .5}
 
             Label:
                 text: "Selected Parser"
@@ -52,36 +50,80 @@
             DropdownButton:
                 id: parser_dropdownbutton
                 text: "Select"
-                background_color: '#33cccc'
+                background_normal: ''
+                background_color: '#6600ff'
                 on_selected_parser: root.set_parser(self.selected_parser)
 
             Button:
-                id: inputfile_selector_button
-                text: "open"
-                on_release: root.open(filechooser.path, filechooser.selection)
-
-            TextInput:
-                id: csv_output_filename
-                hint_text:'Enter filename'
-                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                size_hint: 0.95, 0.5
-                multiline: False
-                on_text_validate: root.set_outputfile(csv_output_filename.text)
-
-        FileChooserListView:
-            id: filechooser
-            on_selection: root.selected(filechooser.selection)
+                text: 'Load'
+                background_normal: ''
+                background_color: '#6600ff' 
+                on_release: root.show_load()
+            Button:
+                text: 'Save'
+                background_normal: ''
+                background_color: '#6600ff' 
+                on_release: root.show_save()
 
         Button:
             id: convert_file_button
             text: "Convert File"
-            size_hint: 0.2, 0.1
+            size_hint: 0.25, 0.25
             pos_hint: {'center_x':.5, 'center_y': .5}
-            background_color: '#33cccc'
-            bold: True
-            on_release: main_screen.start_conversion()
+            background_normal: ''
+            background_color: '#6600ff'
+            bold: True 
+            on_release: root.start_conversion()
 
         TextInput:
             id: logging
             text: ""
             readonly: True
+
+<LoadDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser
+            path: './'
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Load"
+                on_release: root.load(filechooser.path, filechooser.selection)
+
+<SaveDialog>:
+    text_input: text_input
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser
+            path: './'
+            on_selection: text_input.text = self.selection and self.selection[0] or ''
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 30
+            multiline: False
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.save(filechooser.path, text_input.text)
