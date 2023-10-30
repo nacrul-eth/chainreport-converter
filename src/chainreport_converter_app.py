@@ -31,6 +31,7 @@ class MainWindow(BoxLayout):
         self.input_file = ""
         self.output_file = ""
         self.converter_object = ""
+        self._popup = ""
 
     def set_parser(self, parserstring):
         """Set the parser for the conversion"""
