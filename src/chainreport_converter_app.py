@@ -1,6 +1,7 @@
 """Main GUI application to create chainreport files"""
 
 import os
+import sys
 
 # kivy dependencies
 from kivy.app import App
@@ -8,6 +9,7 @@ from kivy.uix.boxlayout import BoxLayout
 # pylint: disable=no-name-in-module
 from kivy.properties import ObjectProperty
 from kivy.uix.popup import Popup
+from kivy.resources import resource_add_path
 
 # program dependencies
 from chainreport_converter import ChainreportConverter
@@ -90,4 +92,7 @@ class ChainreportConverterApp(App):
     """Main application"""
 
 if __name__ == '__main__':
+    if hasattr(sys, '_MEIPASS'):
+        # pylint: disable=protected-access
+        resource_add_path(os.path.join(sys._MEIPASS))
     ChainreportConverterApp().run()
