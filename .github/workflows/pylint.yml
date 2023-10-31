@@ -42,3 +42,11 @@ jobs:
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files '*.py')
+    - name: Package Application
+      uses: JackMcKew/pyinstaller-action-windows@main
+      with:
+        path: .
+    - uses: actions/upload-artifact@v2
+      with:
+        name: chain.report converter
+        path: dist/windows
