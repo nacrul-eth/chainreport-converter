@@ -52,7 +52,7 @@ jobs:
       working-directory: .
     - name: Build with pyinstaller for windows
       run: python -m PyInstaller windows_app.spec
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
-        name: chain.report converter
-        path: dist/windows
+        name: chain.report_converter
+        path: converter.exe
