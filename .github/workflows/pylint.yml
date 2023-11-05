@@ -54,5 +54,5 @@ jobs:
       run: python -m PyInstaller windows_app.spec
     - uses: actions/upload-artifact@v3
       with:
-        name: chain.report_converter
-        path: converter.exe
+        name: 'chain.report converter'
+        path: 'chain.report converter.exe'
