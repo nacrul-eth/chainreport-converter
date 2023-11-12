@@ -79,7 +79,7 @@ class MainWindow(BoxLayout):
             self.log_action("Converting " + self.input_file + " to " +
                             self.output_file + " using the Parser for " +
                             self.parser)
-            self.converter_object.convert()
+            self.converter_object.convert(self.log_action)
             self.log_action("Conversion done!")
         else:
             self.log_action("Please select all input parameters first")
