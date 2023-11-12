@@ -11,13 +11,22 @@ class HiParser(ChainreportParserInterface):
 
     CASHBACKTRANSACTION = ['HI rebate']
     DEPOSITTRANSACTION = ['Crypto deposit',
-                          'crypto receive']
+                          'crypto receive',
+                          'Crypto purchase'] # Missing Euro Amount in CSV from Hi
     STAKINGTRANSACTION = ['Crypto staking yields （HI）']
     WITHDRAWTRANSACTION = ['crypto send',
-                       'Crypto withdraw']
+                       'Crypto withdraw'] # Missing Euro Amount in CSV from Hi
     EXCLUSIONSTRINGS = ['Vault HI daily release',
                        'Crypto earning stake',
                        'Crypto earning release']
+    REFERRALSTRING = ['HI referrer reward',
+                      'HI referrer rebate']
+    TRADETRANSACTION = ['buy Vault HI', # 1. Hi splits trade into two lines
+                        'buy HI paid',  # 2. Hi splits trade into two lines
+                        'Dust to HI']
+    PAYMENTTRANSACTION = ['Card consume', # Missing Euro Amount in CSV from Hi
+                          'convert'] # Missing Euro Amount in CSV from Hi
+    AIRDROPTRANSACTION = ['crypto cashhash redeem']
 
     def get_date_string(self):
         """Return datestring in Chainreport format"""
@@ -34,6 +43,14 @@ class HiParser(ChainreportParserInterface):
             return 'Deposit'
         if self.row['Description'] in HiParser.WITHDRAWTRANSACTION:
             return 'Withdrawal'
+        if self.row['Description'] in HiParser.REFERRALSTRING:
+            return 'Referral_Rewards'
+        if self.row['Description'] in HiParser.TRADETRANSACTION:
+            return 'Trade'
+        if self.row['Description'] in HiParser.PAYMENTTRANSACTION:
+            return 'Payment'
+        if self.row['Description'] in HiParser.AIRDROPTRANSACTION:
+            return 'Airdrop'
         return 'ERROR'
 
     def get_received_amount(self):
