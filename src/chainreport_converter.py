@@ -29,6 +29,36 @@ class ChainreportConverter():
                 reader = csv.DictReader(csvinput, delimiter=',')
                 for row in reader:
                     linecount = linecount + 1
+                    # Combine the multiline trade transaction
+                    if row['Description'] in HiParser.TRADETRANSACTION: 
+                        rowdata1 = HiParser(row)
+                        rowdata2 = HiParser(reader.__next__())
+                        receive_amount = ""
+                        receive_currency = ""
+                        sent_amount = ""
+                        sent_currency = ""
+
+                        if rowdata1.get_received_amount():
+                            receive_amount = rowdata1.get_received_amount()
+                            receive_currency = rowdata1.get_received_currency()
+                            sent_amount = rowdata2.get_sent_amount()
+                            sent_currency = rowdata2.get_sent_currency()
+                        else:
+                            receive_amount = rowdata2.get_received_amount()
+                            receive_currency = rowdata2.get_received_currency()
+                            sent_amount = rowdata1.get_sent_amount()
+                            sent_currency = rowdata1.get_sent_currency()
+
+                        writer.writerow({'Zeitpunkt': rowdata1.get_date_string(),
+                                        'Transaktions Typ': rowdata1.get_transaction_type(), 
+                                        'Anzahl Eingang': receive_amount, 
+                                        'Währung Eingang': receive_currency,
+                                        'Anzahl Ausgang': sent_amount,
+                                        'Währung Ausgang': sent_currency,
+                                        'Transaktionsgebühr': rowdata1.get_transaction_fee_amount(),
+                                        'Währung Transaktionsgebühr': rowdata1.get_transaction_fee_currency(),
+                                        'Oder-ID der Exchange': rowdata1.get_order_id(),
+                                        'Beschreibung': rowdata1.get_description()})                   
                     if row['Description'] not in HiParser.EXCLUSIONSTRINGS:
                         rowdata = HiParser(row)
                         writer.writerow({'Zeitpunkt': rowdata.get_date_string(),
