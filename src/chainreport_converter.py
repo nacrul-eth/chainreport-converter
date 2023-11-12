@@ -43,7 +43,8 @@ class ChainreportConverter():
                                         'Beschreibung': rowdata.get_description()})
                     if row['Description'] in HiParser.WITHDRAWTRANSACTION:
                         if _logging_callback:
-                            _logging_callback("Please fix the line " + str(linecount) + ". The amount is 0 in the export file.")
+                            _logging_callback("Please fix the line " + str(linecount) +
+                                              ". The amount is 0 in the export file.")
                         print({'Zeitpunkt': rowdata.get_date_string(),
                                         'Transaktions Typ': rowdata.get_transaction_type(), 
                                         'Anzahl Eingang': rowdata.get_received_amount(), 
@@ -53,7 +54,7 @@ class ChainreportConverter():
                                         'Transaktionsgebühr': rowdata.get_transaction_fee_amount(),
                                         'Währung Transaktionsgebühr': rowdata.get_transaction_fee_currency(),
                                         'Oder-ID der Exchange': rowdata.get_order_id(),
-                                        'Beschreibung': rowdata.get_description()})   
+                                        'Beschreibung': rowdata.get_description()})
 
         csvinput.close()
         csvoutput.close()
