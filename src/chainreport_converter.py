@@ -32,8 +32,8 @@ class ChainreportConverter():
                     if row['Description'] not in HiParser.EXCLUSIONSTRINGS:
                         rowdata = HiParser(row)
                         writer.writerow({'Zeitpunkt': rowdata.get_date_string(),
-                                        'Transaktions Typ': rowdata.get_transaction_type(), 
-                                        'Anzahl Eingang': rowdata.get_received_amount(), 
+                                        'Transaktions Typ': rowdata.get_transaction_type(),
+                                        'Anzahl Eingang': rowdata.get_received_amount(),
                                         'Währung Eingang': rowdata.get_received_currency(),
                                         'Anzahl Ausgang': rowdata.get_sent_amount(),
                                         'Währung Ausgang': rowdata.get_sent_currency(),
@@ -46,8 +46,8 @@ class ChainreportConverter():
                             _logging_callback("Please fix the line " + str(linecount) +
                                               ". The amount is 0 in the export file.")
                         print({'Zeitpunkt': rowdata.get_date_string(),
-                                        'Transaktions Typ': rowdata.get_transaction_type(), 
-                                        'Anzahl Eingang': rowdata.get_received_amount(), 
+                                        'Transaktions Typ': rowdata.get_transaction_type(),
+                                        'Anzahl Eingang': rowdata.get_received_amount(),
                                         'Währung Eingang': rowdata.get_received_currency(),
                                         'Anzahl Ausgang': rowdata.get_sent_amount(),
                                         'Währung Ausgang': rowdata.get_sent_currency(),
@@ -64,3 +64,8 @@ class ChainreportConverter():
             Please modify all Withdrawal lines (see output above) in the file. Hi does not show that at all in their export file. - 
             Bitte Prüfe alle Withdrawal Zeilen (siehe Ausgabe oben). Hi zeigt immer einen Wert von 0 an.
             ----------------------------------------------------------------------''')
+            if _logging_callback:
+                _logging_callback('''----------------------------------------------------------------------
+                Please modify all Withdrawal lines (see output above) in the file. Hi does not show that at all in their export file. - 
+                Bitte Prüfe alle Withdrawal Zeilen (siehe Ausgabe oben). Hi zeigt immer einen Wert von 0 an.
+                ----------------------------------------------------------------------''')
