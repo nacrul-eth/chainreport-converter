@@ -30,9 +30,9 @@ class ChainreportConverter():
                 for row in reader:
                     linecount = linecount + 1
                     # Combine the multiline trade transaction
-                    if row['Description'] in HiParser.TRADETRANSACTION: 
+                    if row['Description'] in HiParser.TRADETRANSACTION:
                         rowdata1 = HiParser(row)
-                        rowdata2 = HiParser(reader.__next__())
+                        rowdata2 = HiParser(next(reader))
                         receive_amount = ""
                         receive_currency = ""
                         sent_amount = ""
@@ -59,7 +59,7 @@ class ChainreportConverter():
                                         'Währung Transaktionsgebühr': rowdata1.get_transaction_fee_currency(),
                                         'Oder-ID der Exchange': rowdata1.get_order_id(),
                                         'Beschreibung': rowdata1.get_description()})                   
-                    if row['Description'] not in HiParser.EXCLUSIONSTRINGS:
+                    elif row['Description'] not in HiParser.EXCLUSIONSTRINGS:
                         rowdata = HiParser(row)
                         writer.writerow({'Zeitpunkt': rowdata.get_date_string(),
                                         'Transaktions Typ': rowdata.get_transaction_type(),
@@ -71,7 +71,7 @@ class ChainreportConverter():
                                         'Währung Transaktionsgebühr': rowdata.get_transaction_fee_currency(),
                                         'Oder-ID der Exchange': rowdata.get_order_id(),
                                         'Beschreibung': rowdata.get_description()})
-                    if row['Description'] in HiParser.WITHDRAWTRANSACTION:
+                    elif row['Description'] in HiParser.WITHDRAWTRANSACTION:
                         if _logging_callback:
                             _logging_callback("Please fix the line " + str(linecount) +
                                               ". The amount is 0 in the export file.")
