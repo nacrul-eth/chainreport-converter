@@ -27,6 +27,7 @@ class HiParser(ChainreportParserInterface):
     PAYMENTTRANSACTION = ['Card consume', # Missing Euro Amount in CSV from Hi
                           'convert'] # Missing Euro Amount in CSV from Hi
     AIRDROPTRANSACTION = ['crypto cashhash redeem']
+    CANCELTRANSACTION = ['Crypto cancel withdraw']
 
     def get_date_string(self):
         """Return datestring in Chainreport format"""
