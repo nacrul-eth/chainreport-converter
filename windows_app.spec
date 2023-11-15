@@ -10,7 +10,7 @@ a = Analysis(['src\\chainreport_converter_app.py'],
     hiddenimports=['win32timezone'],
     hookspath=hookspath(),
     hooksconfig={},
-    runtime_hooks=untime_hooks(),
+    runtime_hooks=runtime_hooks(),
     excludes=[],
     noarchive=False,
     **get_deps_minimal(video=None, audio=None)
