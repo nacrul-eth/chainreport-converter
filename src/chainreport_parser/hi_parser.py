@@ -36,23 +36,26 @@ class HiParser(ChainreportParserInterface):
 
     def get_transaction_type(self):
         """Return transaction type in Chainreport format"""
-        if self.row['Description'] in HiParser.CASHBACKTRANSACTION:
-            return 'Cashback'
-        if self.row['Description'] in HiParser.STAKINGTRANSACTION:
-            return 'Staking'
-        if self.row['Description'] in HiParser.DEPOSITTRANSACTION:
-            return 'Deposit'
-        if self.row['Description'] in HiParser.WITHDRAWTRANSACTION:
-            return 'Withdrawal'
-        if self.row['Description'] in HiParser.REFERRALSTRING:
-            return 'Referral_Rewards'
-        if self.row['Description'] in HiParser.TRADETRANSACTION:
-            return 'Trade'
-        if self.row['Description'] in HiParser.PAYMENTTRANSACTION:
-            return 'Payment'
-        if self.row['Description'] in HiParser.AIRDROPTRANSACTION:
-            return 'Airdrop'
-        return 'ERROR'
+        transaction_description = self.row['Description']
+        return_string = 'ERROR'
+        if transaction_description in HiParser.CASHBACKTRANSACTION:
+            return_string = 'Cashback'
+        elif transaction_description in HiParser.STAKINGTRANSACTION:
+            return_string = 'Staking'
+        elif transaction_description in HiParser.DEPOSITTRANSACTION:
+            return_string = 'Deposit'
+        elif transaction_description in HiParser.WITHDRAWTRANSACTION:
+            return_string = 'Withdrawal'
+        elif transaction_description in HiParser.REFERRALSTRING:
+            return_string = 'Referral_Rewards'
+        elif transaction_description in HiParser.TRADETRANSACTION:
+            return_string = 'Trade'
+        elif transaction_description in HiParser.PAYMENTTRANSACTION:
+            return_string = 'Payment'
+        elif transaction_description in HiParser.AIRDROPTRANSACTION:
+            return_string = 'Airdrop'
+
+        return return_string
 
     def get_received_amount(self):
         """Return amount of received coins"""
