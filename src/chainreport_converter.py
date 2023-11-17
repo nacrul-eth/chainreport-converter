@@ -53,18 +53,21 @@ class ChainreportConverter():
             with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
                 reader = csv.DictReader(csvinput, delimiter=',')
                 linecount = 0
+                skip_next_line = False
                 next_row = next(reader)
 
                 for row in reader:
-                    del row
-                    # populate required parameters
-                    linecount = linecount + 1
-                    current_row, next_row = next_row, next(reader)
+                    # Populate required parameters
+                    current_row, next_row = next_row, row
+                    # Skip this line as well (didnt figure out skipping 2 lines yet)
+                    if skip_next_line:
+                        skip_next_line = False
+                        continue
                     current_rowdata = HiParser(current_row)
                     next_rowdata = HiParser(next_row)
 
                     # Combine the multiline trade transaction (if there is still a next line left)
-                    if current_rowdata.get_description() in HiParser.TRADETRANSACTION and next_row:
+                    if current_rowdata.get_description() in HiParser.TRADETRANSACTION:
                         receive_amount = ""
                         receive_currency = ""
                         sent_amount = ""
@@ -91,21 +94,26 @@ class ChainreportConverter():
                                          self.TRANS_FEE_CURRENCY_CR: current_rowdata.get_transaction_fee_currency(),
                                          self.ORDERID_CR: current_rowdata.get_order_id(),
                                          self.DESCRIPTION_CR: current_rowdata.get_description()})
+                        linecount = linecount + 1
+                        skip_next_line = True
+                        continue
 
                     # Handle canceled withdrawactions
-                    elif current_rowdata.get_description() in HiParser.WITHDRAWTRANSACTION and next_row:
+                    if current_rowdata.get_description() in HiParser.WITHDRAWTRANSACTION:
                         # Check for cancel of the transaction first
                         if next_rowdata.get_description() in HiParser.CANCELTRANSACTION:
                             # If the Withdraw was canceled, skip both lines
-                            next(reader)
+                            skip_next_line = True
                             continue
                         if _logging_callback:
                             _logging_callback("Please fix the line " + str(linecount) +
                                               ". The amount is 0 in the export file.")
 
                     # If you ended up here, write data into the file
-                    if current_rowdata.get_description() not in HiParser.EXCLUSIONSTRINGS:
+                    if current_rowdata.get_description() not in (HiParser.EXCLUSIONSTRINGS or
+                                                                 HiParser.CANCELTRANSACTION):
                         self.write_row(writer, current_rowdata)
+                        linecount = linecount + 1
 
         csvinput.close()
         csvoutput.close()
