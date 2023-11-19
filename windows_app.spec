@@ -1,16 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
 from kivy_deps import sdl2, glew
-from kivy.tools.packaging.pyinstaller_hooks import get_deps_minimal, hookspath, runtime_hooks
 block_cipher = None
  
 a = Analysis(['src\\chainreport_converter_app.py'],
     pathex=[],
     datas=[],
-    hookspath=hookspath(),
+    hiddenimports=['win32timezone'],
+    hookspath=[],
     hooksconfig={},
-    runtime_hooks=runtime_hooks(),
+    runtime_hooks=[],
     noarchive=False,
-    **get_deps_minimal(video=None, audio=None)
 )
  
 pyz = PYZ(a.pure, a.zipped_data,
