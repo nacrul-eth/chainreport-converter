@@ -39,5 +39,5 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
-          Release.txt
+          dist/Release.txt
           dist/*.exe
