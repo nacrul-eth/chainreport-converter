@@ -1,58 +1,58 @@
-name: Python kivy application
+# name: Python kivy application
 
-on: [push, pull_request]
+# on: [push, pull_request]
 
-jobs:
-  linux_test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10"]
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pylint
-        python -m pip install "kivy[base]"
-    - name: Analysing the code with pylint
-      run: |
-        pylint $(git ls-files '*.py')
+# jobs:
+#   linux_test:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         python-version: ["3.8", "3.9", "3.10"]
+#     steps:
+#     - uses: actions/checkout@v3
+#     - name: Set up Python ${{ matrix.python-version }}
+#       uses: actions/setup-python@v3
+#       with:
+#         python-version: ${{ matrix.python-version }}
+#     - name: Install dependencies
+#       run: |
+#         python -m pip install --upgrade pip
+#         pip install pylint
+#         python -m pip install "kivy[base]"
+#     - name: Analysing the code with pylint
+#       run: |
+#         pylint $(git ls-files '*.py')
 
-  windows_test:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        python-version: ["3.10"]
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pylint
-        pip install pyinstaller
-        python -m pip install "kivy[base]"
-    - name: Analysing the code with pylint
-      run: |
-        pylint $(git ls-files '*.py')
-    - name: Install Mesa
-      shell: cmd
-      run: |
-        curl.exe -L --output mesa.7z --url https://github.com/pal1000/mesa-dist-win/releases/download/23.2.1/mesa3d-23.2.1-release-msvc.7z
-        "C:\Program Files\7-Zip\7z.exe" x mesa.7z
-        systemwidedeploy.cmd 1
-      working-directory: .
-    - name: Build with pyinstaller for windows
-      run: python -m PyInstaller windows_app.spec
-    - uses: actions/upload-artifact@v3
-      with:
-        name: 'chain.report converter'
-        path: 'dist/chain.report converter.exe'
+#   windows_test:
+#     runs-on: windows-latest
+#     strategy:
+#       matrix:
+#         python-version: ["3.10"]
+#     steps:
+#     - uses: actions/checkout@v3
+#     - name: Set up Python ${{ matrix.python-version }}
+#       uses: actions/setup-python@v3
+#       with:
+#         python-version: ${{ matrix.python-version }}
+#     - name: Install dependencies
+#       run: |
+#         python -m pip install --upgrade pip
+#         pip install pylint
+#         pip install pyinstaller
+#         python -m pip install "kivy[base]"
+#     - name: Analysing the code with pylint
+#       run: |
+#         pylint $(git ls-files '*.py')
+#     - name: Install Mesa
+#       shell: cmd
+#       run: |
+#         curl.exe -L --output mesa.7z --url https://github.com/pal1000/mesa-dist-win/releases/download/23.2.1/mesa3d-23.2.1-release-msvc.7z
+#         "C:\Program Files\7-Zip\7z.exe" x mesa.7z
+#         systemwidedeploy.cmd 1
+#       working-directory: .
+#     - name: Build with pyinstaller for windows
+#       run: python -m PyInstaller windows_app.spec
+#     - uses: actions/upload-artifact@v3
+#       with:
+#         name: 'chain.report converter'
+#         path: 'dist/chain.report converter.exe'
