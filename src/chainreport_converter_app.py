@@ -68,6 +68,8 @@ class MainWindow(BoxLayout):
     def save(self, path, filename):
         """Set the full output filname (including path) in local variable"""
         self.output_file = os.path.join(path, filename)
+        if not self.output_file.endswith(".csv"):
+            self.output_file = self.output_file + ".csv"
         self.log_action("You chose to write to the following file: " + self.output_file)
 
         self.dismiss_popup()
