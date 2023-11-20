@@ -24,4 +24,5 @@ exe = EXE(pyz, Tree('src'),
           debug=False,
           strip=False,
           upx=True,
+          icon=['src\\assets\\app-logo.ico'],
           name='chain.report converter')
