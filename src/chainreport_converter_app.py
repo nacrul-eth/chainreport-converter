@@ -92,6 +92,9 @@ class MainWindow(BoxLayout):
 
 class ChainreportConverterApp(App):
     """Main application"""
+    def build(self):
+        self.icon = 'assets/app-logo.ico'
+        self.title = 'chain.report converter'
 
 if __name__ == '__main__':
     if hasattr(sys, '_MEIPASS'):
