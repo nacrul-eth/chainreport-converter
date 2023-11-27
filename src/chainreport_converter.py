@@ -100,8 +100,8 @@ class ChainreportConverter():
                         if current_rowdata.get_transaction_type() == 'ERROR':
                             self.statistics["errors"] += 1
                             if _logging_callback:
-                                _logging_callback("Please report line " + str(self.statistics["output_linecount"]) + "\n" +
-                                                  str(current_row) + "\nThis has to be fixed.")
+                                _logging_callback("Please report line " + str(self.statistics["output_linecount"]) +
+                                                  "\n" + str(current_row) + "\nThis has to be fixed.")
 
         csvinput.close()
         csvoutput.close()
