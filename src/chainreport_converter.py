@@ -76,7 +76,7 @@ class ChainreportConverter():
                     next_rowdata = self.parser(next_row)
 
                     # Combine the multiline trade transaction (if there is still a next line left)
-                    if current_rowdata.get_description() in self.parser.TRADETRANSACTION:
+                    if current_rowdata.get_description() in self.parser.TRADETRANSACTION and self.parser == HiParser:
                         self.handle_trade_transactions(writer, current_rowdata, next_rowdata)
                         skip_next_line = True
                         continue
@@ -99,22 +99,26 @@ class ChainreportConverter():
                         self.write_row(writer, current_rowdata)
                         if current_rowdata.get_transaction_type() == 'ERROR':
                             self.statistics["errors"] += 1
+                            if _logging_callback:
+                                _logging_callback("Please report line " + str(self.statistics["output_linecount"]) + "\n" +
+                                                  str(current_row) + "\nThis has to be fixed.")
 
         csvinput.close()
         csvoutput.close()
 
         if _logging_callback:
-            _logging_callback('''
+            _logging_callback("""
             ----------------------------------------------------------------------
-            Read lines: ''' + str(self.statistics["input_linecount"]) + '''
-            Written lines: ''' + str(self.statistics["output_linecount"]) + '''
-            Number of Warnings: ''' + str(self.statistics["warnings"]) + ''' - Please check above
-            Number of Errors: ''' + str(self.statistics["errors"]) + ''' - Please report them
-            ----------------------------------------------------------------------''')
+            Read lines: """ + str(self.statistics["input_linecount"]) + """
+            Written lines: """ + str(self.statistics["output_linecount"]) + """
+            Number of Warnings: """ + str(self.statistics["warnings"]) + """ - Please check above
+            Number of Errors: """ + str(self.statistics["errors"]) + """ - Please report them
+            Please check details here: 
+            https://github.com/nacrul-eth/chainreport-converter/wiki/HiParser/""" + self.parser.NAME + """
+            ----------------------------------------------------------------------""")
 
     def handle_trade_transactions(self, writer, current_rowdata, next_rowdata):
         """Special handling for 2 line trade transactions"""
-        #TODO: Encapsulate this special case into the HiParser
         receive_amount = ""
         receive_currency = ""
         sent_amount = ""
