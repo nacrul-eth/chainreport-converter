@@ -9,6 +9,7 @@ class HiParser(ChainreportParserInterface):
     def __init__(self, row):
         self.row = row
 
+    NAME = __qualname__
     CASHBACKTRANSACTION = ['HI rebate']
     DEPOSITTRANSACTION = ['Crypto deposit',
                           'crypto receive',
