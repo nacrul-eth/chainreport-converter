@@ -2,6 +2,7 @@
 
 import csv
 from chainreport_parser.hi_parser import HiParser
+from chainreport_parser.plutus_parser import PlutusParser
 
 class ChainreportConverter():
     """Main Class handling the csv files (open, close) and the conversion of the content"""
@@ -19,6 +20,8 @@ class ChainreportConverter():
         self.parser_type = parsertype
         if parsertype == "Hi":
             self.parser = HiParser
+        elif parsertype == "Plutus":
+            self.parser = PlutusParser
         else:
             return
 
@@ -60,7 +63,7 @@ class ChainreportConverter():
             writer.writeheader()
 
             with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
-                reader = csv.DictReader(csvinput, delimiter=',')
+                reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
                 skip_next_line = False
                 next_row = next(reader)
 
