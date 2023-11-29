@@ -20,13 +20,18 @@ class HiParser(ChainreportParserInterface):
                        'Crypto withdraw'] # Missing Euro Amount in CSV from Hi
     EXCLUSIONSTRINGS = ['Vault HI daily release',
                        'Crypto earning stake',
-                       'Crypto earning release']
+                       'Crypto earning release',
+                       'Yields']
     REFERRALSTRING = ['HI referrer reward',
                       'HI referrer rebate']
     TRADETRANSACTION = ['buy Vault HI', # 1. Hi splits trade into two lines
                         'buy HI paid',  # 2. Hi splits trade into two lines
                         'Dust to HI']
-    PAYMENTTRANSACTION = ['Card consume', # Missing Euro Amount in CSV from Hi
+    PAYMENTTRANSACTION = ['Fiat deposit（IBAN）',
+                          'Fiat withdraw (IBAN)',
+                          'Card refund',
+                          'Card consume',
+                          'Fiat deposit （BankTransfer）',
                           'convert'] # Missing Euro Amount in CSV from Hi
     AIRDROPTRANSACTION = ['crypto cashhash redeem']
     CANCELTRANSACTION = ['Crypto cancel withdraw']
