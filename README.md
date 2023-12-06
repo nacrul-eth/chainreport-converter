@@ -12,3 +12,4 @@ Currently the following exchanges/blockchains are supported /
 Aktuell werden die folgenden Exchanges/Blockchains unterstützt:
 
 - Hi (<https://hi.com>)
+- Plutus (<https://plutus.it>) (Rewards export only)
