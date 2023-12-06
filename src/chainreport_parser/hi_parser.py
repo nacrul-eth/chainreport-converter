@@ -26,7 +26,9 @@ class HiParser(ChainreportParserInterface):
                        'Fiat deposit（IBAN）',
                        'Fiat withdraw (IBAN)',
                        'Fiat deposit （BankTransfer）',
-                       'Yields']
+                       'Yields', 
+                       'crypto transfer to trading', 
+                       'crypto transfer to flexible']
     REFERRALSTRING = ['HI referrer reward',
                       'HI referrer rebate']
     TRADETRANSACTION = ['buy Vault HI', # 1. Hi splits trade into two lines
