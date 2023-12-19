@@ -3,7 +3,7 @@
 from datetime import datetime
 from .chainreport_parser_interface import ChainreportParserInterface
 
-class HiParser(ChainreportParserInterface):
+class HiParserCsv(ChainreportParserInterface):
     """Extract all required information from Hi statement."""
 
     def __init__(self, row):
@@ -47,21 +47,21 @@ class HiParser(ChainreportParserInterface):
         """Return transaction type in Chainreport format"""
         transaction_description = self.row['Description']
         return_string = 'ERROR'
-        if transaction_description in HiParser.CASHBACKTRANSACTION:
+        if transaction_description in HiParserCsv.CASHBACKTRANSACTION:
             return_string = 'Cashback'
-        elif transaction_description in HiParser.STAKINGTRANSACTION:
+        elif transaction_description in HiParserCsv.STAKINGTRANSACTION:
             return_string = 'Staking'
-        elif transaction_description in HiParser.DEPOSITTRANSACTION:
+        elif transaction_description in HiParserCsv.DEPOSITTRANSACTION:
             return_string = 'Deposit'
-        elif transaction_description in HiParser.WITHDRAWTRANSACTION:
+        elif transaction_description in HiParserCsv.WITHDRAWTRANSACTION:
             return_string = 'Withdrawal'
-        elif transaction_description in HiParser.REFERRALSTRING:
+        elif transaction_description in HiParserCsv.REFERRALSTRING:
             return_string = 'Referral_Rewards'
-        elif transaction_description in HiParser.TRADETRANSACTION:
+        elif transaction_description in HiParserCsv.TRADETRANSACTION:
             return_string = 'Trade'
-        elif transaction_description in HiParser.PAYMENTTRANSACTION:
+        elif transaction_description in HiParserCsv.PAYMENTTRANSACTION:
             return_string = 'Payment'
-        elif transaction_description in HiParser.AIRDROPTRANSACTION:
+        elif transaction_description in HiParserCsv.AIRDROPTRANSACTION:
             return_string = 'Airdrop'
 
         return return_string

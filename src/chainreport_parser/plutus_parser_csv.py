@@ -3,7 +3,7 @@
 from datetime import datetime
 from .chainreport_parser_interface import ChainreportParserInterface
 
-class PlutusParser(ChainreportParserInterface):
+class PlutusParserCsv(ChainreportParserInterface):
     """Extract all required information from Plutus Rewards file."""
 
     def __init__(self, row):
@@ -32,7 +32,7 @@ class PlutusParser(ChainreportParserInterface):
         """Return transaction type in Chainreport format"""
         transaction_description = self.row['type']
         return_string = 'ERROR'
-        if transaction_description in PlutusParser.CASHBACKTRANSACTION:
+        if transaction_description in PlutusParserCsv.CASHBACKTRANSACTION:
             return_string = 'Cashback'
         return return_string
 

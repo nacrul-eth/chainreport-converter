@@ -3,9 +3,9 @@
 import csv
 from PyPDF2 import PdfReader
 
-from chainreport_parser.hi_parser import HiParser
+from chainreport_parser.hi_parser_csv import HiParserCsv
 from chainreport_parser.hi_parser_pdf import HiParserPdf
-from chainreport_parser.plutus_parser import PlutusParser
+from chainreport_parser.plutus_parser_csv import PlutusParserCsv
 
 
 class ChainreportConverter():
@@ -22,14 +22,14 @@ class ChainreportConverter():
         self.chainreport_filename = outputfile
         self.input_filename = inputfile
         self.parser_type = parsertype
-        if parsertype == "Hi":
-            self.parser = HiParser
+        if parsertype == "Hi-CSV":
+            self.parser = HiParserCsv
             self.inputtype = "csv"
         elif parsertype == "Hi-PDF":
             self.parser = HiParserPdf
             self.inputtype = "pdf"
-        elif parsertype == "Plutus":
-            self.parser = PlutusParser
+        elif parsertype == "Plutus-CSV":
+            self.parser = PlutusParserCsv
             self.inputtype = "csv"
         else:
             return
@@ -45,19 +45,28 @@ class ChainreportConverter():
     ORDERID_CR = 'Oder-ID der Exchange'
     DESCRIPTION_CR = 'Beschreibung'
 
-    def write_row(self, csv_writer, row):
+    def write_row(self, csv_writer, input_line, _logging_callback):
         """Write the row into the csv file"""
-        csv_writer.writerow({self.DATESTRING_CR: row.get_date_string(),
-                             self.TRANSACTIONTYP_CR: row.get_transaction_type(),
-                             self.RECEIVED_AMOUNT_CR: row.get_received_amount(),
-                             self.RECEIVED_CURRENCY_CR: row.get_received_currency(),
-                             self.SENT_AMOUNT_CR: row.get_sent_amount(),
-                             self.SENT_CURRENCY_CR: row.get_sent_currency(),
-                             self.TRANS_FEE_AMOUNT_CR: row.get_transaction_fee_amount(),
-                             self.TRANS_FEE_CURRENCY_CR: row.get_transaction_fee_currency(),
-                             self.ORDERID_CR: row.get_order_id(),
-                             self.DESCRIPTION_CR: row.get_description()})
+        csv_writer.writerow({self.DATESTRING_CR: input_line.get_date_string(),
+                             self.TRANSACTIONTYP_CR: input_line.get_transaction_type(),
+                             self.RECEIVED_AMOUNT_CR: input_line.get_received_amount(),
+                             self.RECEIVED_CURRENCY_CR: input_line.get_received_currency(),
+                             self.SENT_AMOUNT_CR: input_line.get_sent_amount(),
+                             self.SENT_CURRENCY_CR: input_line.get_sent_currency(),
+                             self.TRANS_FEE_AMOUNT_CR: input_line.get_transaction_fee_amount(),
+                             self.TRANS_FEE_CURRENCY_CR: input_line.get_transaction_fee_currency(),
+                             self.ORDERID_CR: input_line.get_order_id(),
+                             self.DESCRIPTION_CR: input_line.get_description()})
         self.statistics["output_linecount"] += 1
+        if input_line.get_transaction_type() == 'ERROR':
+            self.log_error(input_line, _logging_callback)
+
+    def log_error(self, line, _logging_callback):
+        """Log the error via callback and update statistics"""
+        self.statistics["errors"] += 1
+        if _logging_callback:
+            _logging_callback("Please report line " + str(self.statistics["output_linecount"]) +
+                            "\n" + str(line) + "\nThis has to be fixed.")
 
     def convert_pdf(self, csv_writer, _logging_callback = None):
         """Convert the input pdf to a compatible chainreport file depending on the parser selection"""
@@ -74,15 +83,55 @@ class ChainreportConverter():
                     # If you ended up here, write data into the file
                     if parser_object.get_description() not in (self.parser.EXCLUSIONSTRINGS or
                                                                self.parser.CANCELTRANSACTION):
-                        self.write_row(csv_writer, parser_object)
-                        if parser_object.get_transaction_type() == 'ERROR':
-                            self.statistics["errors"] += 1
-                            if _logging_callback:
-                                _logging_callback("Please report line " + str(self.statistics["output_linecount"]) +
-                                                "\n" + str(line) + "\nThis has to be fixed.")
+                        self.write_row(csv_writer, parser_object, _logging_callback)
+
+
+    def convert_csv(self, csv_writer, _logging_callback):
+        """Convert the input csv to a compatible chainreport file depending on the parser selection"""
+
+        with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
+            reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
+            skip_next_line = False
+            next_row = next(reader)
+
+            for row in reader:
+                self.statistics["input_linecount"] += 1
+                # Populate required parameters
+                current_row, next_row = next_row, row
+                # Skip this line as well (didnt figure out skipping 2 lines yet)
+                if skip_next_line:
+                    skip_next_line = False
+                    continue
+                current_rowdata = self.parser(current_row)
+                next_rowdata = self.parser(next_row)
+
+                        # Combine the multiline trade transaction (if there is still a next line left)
+                if current_rowdata.get_description() in self.parser.TRADETRANSACTION and self.parser == HiParserCsv:
+                    self.handle_trade_transactions(csv_writer, current_rowdata, next_rowdata)
+                    skip_next_line = True
+                    continue
+
+                        # Handle canceled withdrawactions
+                if current_rowdata.get_description() in self.parser.WITHDRAWTRANSACTION:
+                    # Check for cancel of the transaction first
+                    if next_rowdata.get_description() in self.parser.CANCELTRANSACTION:
+                        # If the Withdraw was canceled, skip both lines
+                        skip_next_line = True
+                        continue
+                    if _logging_callback:
+                        _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
+                                                ". The amount is 0 in the export file.")
+                    self.statistics["warnings"] += 1
+
+                        # If you ended up here, write data into the file
+                if current_rowdata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
+                                                                    self.parser.CANCELTRANSACTION):
+                    self.write_row(csv_writer, current_rowdata, _logging_callback)
+        csvinput.close()
 
     def convert(self, _logging_callback = None):
-        """Convert the input file to a compatible chainreport file depending on the parser selection"""
+        """Main conversion function: 
+        Convert the input file to a compatible chainreport file depending on the parser selection"""
 
         with open (self.chainreport_filename, 'w', newline='', encoding="utf-8") as csvoutput:
             fieldnames = [self.DATESTRING_CR, self.TRANSACTIONTYP_CR,
@@ -96,50 +145,7 @@ class ChainreportConverter():
             if self.inputtype == "pdf":
                 self.convert_pdf(writer, _logging_callback)
             elif self.inputtype == "csv":
-                with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
-                    reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
-                    skip_next_line = False
-                    next_row = next(reader)
-
-                    for row in reader:
-                        self.statistics["input_linecount"] += 1
-                        # Populate required parameters
-                        current_row, next_row = next_row, row
-                        # Skip this line as well (didnt figure out skipping 2 lines yet)
-                        if skip_next_line:
-                            skip_next_line = False
-                            continue
-                        current_rowdata = self.parser(current_row)
-                        next_rowdata = self.parser(next_row)
-
-                        # Combine the multiline trade transaction (if there is still a next line left)
-                        if current_rowdata.get_description() in self.parser.TRADETRANSACTION and self.parser == HiParser:
-                            self.handle_trade_transactions(writer, current_rowdata, next_rowdata)
-                            skip_next_line = True
-                            continue
-
-                        # Handle canceled withdrawactions
-                        if current_rowdata.get_description() in self.parser.WITHDRAWTRANSACTION:
-                            # Check for cancel of the transaction first
-                            if next_rowdata.get_description() in self.parser.CANCELTRANSACTION:
-                                # If the Withdraw was canceled, skip both lines
-                                skip_next_line = True
-                                continue
-                            if _logging_callback:
-                                _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
-                                                ". The amount is 0 in the export file.")
-                            self.statistics["warnings"] += 1
-
-                        # If you ended up here, write data into the file
-                        if current_rowdata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
-                                                                    self.parser.CANCELTRANSACTION):
-                            self.write_row(writer, current_rowdata)
-                            if current_rowdata.get_transaction_type() == 'ERROR':
-                                self.statistics["errors"] += 1
-                                if _logging_callback:
-                                    _logging_callback("Please report line " + str(self.statistics["output_linecount"]) +
-                                                    "\n" + str(current_row) + "\nThis has to be fixed.")
-                csvinput.close()
+                self.convert_csv(writer, _logging_callback)
 
             csvoutput.close()
 
@@ -154,32 +160,32 @@ class ChainreportConverter():
             https://github.com/nacrul-eth/chainreport-converter/wiki/HiParser/""" + self.parser.NAME + """
             ----------------------------------------------------------------------""")
 
-    def handle_trade_transactions(self, writer, current_rowdata, next_rowdata):
-        """Special handling for 2 line trade transactions"""
+    def handle_trade_transactions(self, writer, current_linedata, next_linedata):
+        """Special handling for 2 line trade transactions with Hi"""
         receive_amount = ""
         receive_currency = ""
         sent_amount = ""
         sent_currency = ""
 
-        if current_rowdata.get_received_amount():
-            receive_amount = current_rowdata.get_received_amount()
-            receive_currency = current_rowdata.get_received_currency()
-            sent_amount = next_rowdata.get_sent_amount()
-            sent_currency = next_rowdata.get_sent_currency()
+        if current_linedata.get_received_amount():
+            receive_amount = current_linedata.get_received_amount()
+            receive_currency = current_linedata.get_received_currency()
+            sent_amount = next_linedata.get_sent_amount()
+            sent_currency = next_linedata.get_sent_currency()
         else:
-            receive_amount = next_rowdata.get_received_amount()
-            receive_currency = next_rowdata.get_received_currency()
-            sent_amount = current_rowdata.get_sent_amount()
-            sent_currency = current_rowdata.get_sent_currency()
+            receive_amount = next_linedata.get_received_amount()
+            receive_currency = next_linedata.get_received_currency()
+            sent_amount = current_linedata.get_sent_amount()
+            sent_currency = current_linedata.get_sent_currency()
 
-        writer.writerow({self.DATESTRING_CR: current_rowdata.get_date_string(),
-                                         self.TRANSACTIONTYP_CR: current_rowdata.get_transaction_type(),
+        writer.writerow({self.DATESTRING_CR: current_linedata.get_date_string(),
+                                         self.TRANSACTIONTYP_CR: current_linedata.get_transaction_type(),
                                          self.RECEIVED_AMOUNT_CR: receive_amount,
                                          self.RECEIVED_CURRENCY_CR: receive_currency,
                                          self.SENT_AMOUNT_CR: sent_amount,
                                          self.SENT_CURRENCY_CR: sent_currency,
-                                         self.TRANS_FEE_AMOUNT_CR: current_rowdata.get_transaction_fee_amount(),
-                                         self.TRANS_FEE_CURRENCY_CR: current_rowdata.get_transaction_fee_currency(),
-                                         self.ORDERID_CR: current_rowdata.get_order_id(),
-                                         self.DESCRIPTION_CR: current_rowdata.get_description()})
+                                         self.TRANS_FEE_AMOUNT_CR: current_linedata.get_transaction_fee_amount(),
+                                         self.TRANS_FEE_CURRENCY_CR: current_linedata.get_transaction_fee_currency(),
+                                         self.ORDERID_CR: current_linedata.get_order_id(),
+                                         self.DESCRIPTION_CR: current_linedata.get_description()})
         self.statistics["output_linecount"] += 1

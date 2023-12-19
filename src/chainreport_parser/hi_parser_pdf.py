@@ -8,7 +8,6 @@ class HiParserPdf(ChainreportParserInterface):
     """Extract all required information from Hi statement."""
 
     def __init__(self, line):
-        self.plain_line = line
         for data in re.finditer(r'(?P<date>\d+-\d+-\d+\s\d+\d+:\d+\s[UTC]+) (?P<description>[/a-zA-Z ()]+) (?P<amount>-*[\d]*[.]*[\d]*) (?P<currency>[\w]+$)', line):
             self.date = data.group('date')
             self.description = data.group('description')
