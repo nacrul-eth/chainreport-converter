@@ -1,8 +1,12 @@
 """Main Module to parse csv files and create a chainreport compatible version."""
 
 import csv
+from PyPDF2 import PdfReader
+
 from chainreport_parser.hi_parser import HiParser
+from chainreport_parser.hi_parser_pdf import HiParserPdf
 from chainreport_parser.plutus_parser import PlutusParser
+
 
 class ChainreportConverter():
     """Main Class handling the csv files (open, close) and the conversion of the content"""
@@ -20,8 +24,13 @@ class ChainreportConverter():
         self.parser_type = parsertype
         if parsertype == "Hi":
             self.parser = HiParser
+            self.inputtype = "csv"
+        elif parsertype == "Hi-PDF":
+            self.parser = HiParserPdf
+            self.inputtype = "pdf"
         elif parsertype == "Plutus":
             self.parser = PlutusParser
+            self.inputtype = "csv"
         else:
             return
 
@@ -50,64 +59,89 @@ class ChainreportConverter():
                              self.DESCRIPTION_CR: row.get_description()})
         self.statistics["output_linecount"] += 1
 
+    def convert_pdf(self, csv_writer, _logging_callback = None):
+        """Convert the input pdf to a compatible chainreport file depending on the parser selection"""
+
+        pdf_reader = PdfReader(self.input_filename)
+        for page in pdf_reader.pages:
+            text = page.extract_text().split("\n")
+            for line in text:
+                # Use the 20th century for selection, dont expect hi to be around after 2100 ;)
+                if line.startswith("20"):
+                    self.statistics["input_linecount"] += 1
+
+                    parser_object = self.parser(line)
+                    # If you ended up here, write data into the file
+                    if parser_object.get_description() not in (self.parser.EXCLUSIONSTRINGS or
+                                                               self.parser.CANCELTRANSACTION):
+                        self.write_row(csv_writer, parser_object)
+                        if parser_object.get_transaction_type() == 'ERROR':
+                            self.statistics["errors"] += 1
+                            if _logging_callback:
+                                _logging_callback("Please report line " + str(self.statistics["output_linecount"]) +
+                                                "\n" + str(line) + "\nThis has to be fixed.")
+
     def convert(self, _logging_callback = None):
         """Convert the input file to a compatible chainreport file depending on the parser selection"""
 
         with open (self.chainreport_filename, 'w', newline='', encoding="utf-8") as csvoutput:
             fieldnames = [self.DATESTRING_CR, self.TRANSACTIONTYP_CR,
-                          self.RECEIVED_AMOUNT_CR, self.RECEIVED_CURRENCY_CR,
-                          self.SENT_AMOUNT_CR, self.SENT_CURRENCY_CR,
-                          self.TRANS_FEE_AMOUNT_CR, self.TRANS_FEE_CURRENCY_CR,
-                          self.ORDERID_CR, self.DESCRIPTION_CR ]
+                        self.RECEIVED_AMOUNT_CR, self.RECEIVED_CURRENCY_CR,
+                        self.SENT_AMOUNT_CR, self.SENT_CURRENCY_CR,
+                        self.TRANS_FEE_AMOUNT_CR, self.TRANS_FEE_CURRENCY_CR,
+                        self.ORDERID_CR, self.DESCRIPTION_CR ]
             writer = csv.DictWriter(csvoutput, delimiter=';', fieldnames=fieldnames)
             writer.writeheader()
 
-            with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
-                reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
-                skip_next_line = False
-                next_row = next(reader)
+            if self.inputtype == "pdf":
+                self.convert_pdf(writer, _logging_callback)
+            elif self.inputtype == "csv":
+                with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
+                    reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
+                    skip_next_line = False
+                    next_row = next(reader)
 
-                for row in reader:
-                    self.statistics["input_linecount"] += 1
-                    # Populate required parameters
-                    current_row, next_row = next_row, row
-                    # Skip this line as well (didnt figure out skipping 2 lines yet)
-                    if skip_next_line:
-                        skip_next_line = False
-                        continue
-                    current_rowdata = self.parser(current_row)
-                    next_rowdata = self.parser(next_row)
+                    for row in reader:
+                        self.statistics["input_linecount"] += 1
+                        # Populate required parameters
+                        current_row, next_row = next_row, row
+                        # Skip this line as well (didnt figure out skipping 2 lines yet)
+                        if skip_next_line:
+                            skip_next_line = False
+                            continue
+                        current_rowdata = self.parser(current_row)
+                        next_rowdata = self.parser(next_row)
 
-                    # Combine the multiline trade transaction (if there is still a next line left)
-                    if current_rowdata.get_description() in self.parser.TRADETRANSACTION and self.parser == HiParser:
-                        self.handle_trade_transactions(writer, current_rowdata, next_rowdata)
-                        skip_next_line = True
-                        continue
-
-                    # Handle canceled withdrawactions
-                    if current_rowdata.get_description() in self.parser.WITHDRAWTRANSACTION:
-                        # Check for cancel of the transaction first
-                        if next_rowdata.get_description() in self.parser.CANCELTRANSACTION:
-                            # If the Withdraw was canceled, skip both lines
+                        # Combine the multiline trade transaction (if there is still a next line left)
+                        if current_rowdata.get_description() in self.parser.TRADETRANSACTION and self.parser == HiParser:
+                            self.handle_trade_transactions(writer, current_rowdata, next_rowdata)
                             skip_next_line = True
                             continue
-                        if _logging_callback:
-                            _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
-                                              ". The amount is 0 in the export file.")
-                        self.statistics["warnings"] += 1
 
-                    # If you ended up here, write data into the file
-                    if current_rowdata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
-                                                                 self.parser.CANCELTRANSACTION):
-                        self.write_row(writer, current_rowdata)
-                        if current_rowdata.get_transaction_type() == 'ERROR':
-                            self.statistics["errors"] += 1
+                        # Handle canceled withdrawactions
+                        if current_rowdata.get_description() in self.parser.WITHDRAWTRANSACTION:
+                            # Check for cancel of the transaction first
+                            if next_rowdata.get_description() in self.parser.CANCELTRANSACTION:
+                                # If the Withdraw was canceled, skip both lines
+                                skip_next_line = True
+                                continue
                             if _logging_callback:
-                                _logging_callback("Please report line " + str(self.statistics["output_linecount"]) +
-                                                  "\n" + str(current_row) + "\nThis has to be fixed.")
+                                _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
+                                                ". The amount is 0 in the export file.")
+                            self.statistics["warnings"] += 1
 
-        csvinput.close()
-        csvoutput.close()
+                        # If you ended up here, write data into the file
+                        if current_rowdata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
+                                                                    self.parser.CANCELTRANSACTION):
+                            self.write_row(writer, current_rowdata)
+                            if current_rowdata.get_transaction_type() == 'ERROR':
+                                self.statistics["errors"] += 1
+                                if _logging_callback:
+                                    _logging_callback("Please report line " + str(self.statistics["output_linecount"]) +
+                                                    "\n" + str(current_row) + "\nThis has to be fixed.")
+                csvinput.close()
+
+            csvoutput.close()
 
         if _logging_callback:
             _logging_callback("""
