@@ -9,6 +9,7 @@ class HiParserPdf(ChainreportParserInterface):
 
     def __init__(self, line):
         self.input_line = line
+        # pylint: disable=line-too-long
         pattern = re.compile(r'(?P<date>\d+-\d+-\d+\s\d+\d+:\d+\s[UTC]+) (?P<description>[/a-zA-Z ()]+) (?P<amount>-*[\d]*[.]*[\d]*) (?P<currency>[\w]+$)')
         for data in re.finditer(pattern, line):
             self.date = data.group('date')
@@ -16,6 +17,7 @@ class HiParserPdf(ChainreportParserInterface):
             self.amount = data.group('amount').replace(".", ",")
             self.currency = data.group('currency')
 
+    # pylint: disable=duplicate-code
     NAME = __qualname__
     CASHBACKTRANSACTION = ['HI rebate']
     DEPOSITTRANSACTION = ['Crypto deposit',
