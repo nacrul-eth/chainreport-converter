@@ -1,13 +1,14 @@
 """Parser implementation for HI"""
+# pylint: disable=duplicate-code
 
 from datetime import datetime
 from .chainreport_parser_interface import ChainreportParserInterface
 
-class PlutusParser(ChainreportParserInterface):
+class PlutusParserCsv(ChainreportParserInterface):
     """Extract all required information from Plutus Rewards file."""
 
     def __init__(self, row):
-        self.row = row
+        self.input_row = row
 
     NAME = __qualname__
     DELIMITER="|"
@@ -23,22 +24,26 @@ class PlutusParser(ChainreportParserInterface):
     AIRDROPTRANSACTION = []
     CANCELTRANSACTION = []
 
+    def get_input_string(self):
+        """Return the input data we are using"""
+        return self.input_row
+
     def get_date_string(self):
         """Return datestring in Chainreport format"""
-        transaction_time = datetime.strptime(self.row['createdAt'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        transaction_time = datetime.strptime(self.input_row['createdAt'], '%Y-%m-%dT%H:%M:%S.%fZ')
         return transaction_time.strftime('%d.%m.%Y %H:%M')
 
     def get_transaction_type(self):
         """Return transaction type in Chainreport format"""
-        transaction_description = self.row['type']
+        transaction_description = self.input_row['type']
         return_string = 'ERROR'
-        if transaction_description in PlutusParser.CASHBACKTRANSACTION:
+        if transaction_description in PlutusParserCsv.CASHBACKTRANSACTION:
             return_string = 'Cashback'
         return return_string
 
     def get_received_amount(self):
         """Return amount of received coins"""
-        return self.row['reward_plu_value'].replace(".", ",")
+        return self.input_row['reward_plu_value'].replace(".", ",")
 
     def get_received_currency(self):
         """Return currency of receveid coins"""
@@ -62,8 +67,8 @@ class PlutusParser(ChainreportParserInterface):
 
     def get_order_id(self):
         """Return order id of the exchange"""
-        return self.row['statement_id']
+        return self.input_row['statement_id']
 
     def get_description(self):
         """Return description of the transaction"""
-        return self.row['description']
+        return self.input_row['description']
