@@ -59,17 +59,19 @@ class ChainreportConverter():
                              self.DESCRIPTION_CR: input_line.get_description()})
         self.statistics["output_linecount"] += 1
         if input_line.get_transaction_type() == 'ERROR':
-            self.log_error(input_line, _logging_callback)
+            self.log_error(input_line.get_input_string(), _logging_callback)
 
-    def log_error(self, line, _logging_callback):
+    def log_error(self, linedata, _logging_callback):
         """Log the error via callback and update statistics"""
         self.statistics["errors"] += 1
         if _logging_callback:
             _logging_callback("Please report line " + str(self.statistics["output_linecount"]) +
-                            "\n" + str(line) + "\nThis has to be fixed.")
+                            "\n" + str(linedata) + "\nThis has to be fixed.")
 
     def convert_pdf(self, csv_writer, _logging_callback = None):
         """Convert the input pdf to a compatible chainreport file depending on the parser selection"""
+        skip_next_line = False
+        next_line = ""
 
         pdf_reader = PdfReader(self.input_filename)
         for page in pdf_reader.pages:
@@ -78,12 +80,40 @@ class ChainreportConverter():
                 # Use the 20th century for selection, dont expect hi to be around after 2100 ;)
                 if line.startswith("20"):
                     self.statistics["input_linecount"] += 1
+                    # Populate required parameters only, if they were already initialized
+                    if not next_line:
+                        next_line = line
+                        continue
+                    current_line, next_line = next_line, line
 
-                    parser_object = self.parser(line)
+                    # Only skip this line, if it contains a valid content (didnt figure out skipping 2 lines yet)
+                    if skip_next_line:
+                        if line.startswith("20"):
+                            skip_next_line = False
+                            continue
+                        continue
+
+                    current_linedata = self.parser(current_line)
+                    next_linedata = self.parser(next_line)
+
+                    # Combine the multiline trade transaction (if there is still a next line left)
+                    if (current_linedata.get_description() in self.parser.TRADETRANSACTION
+                            and self.parser == HiParserPdf):
+                        self.handle_trade_transactions(csv_writer, current_linedata, next_linedata)
+                        skip_next_line = True
+                        continue
+                    # Handle canceled withdrawactions
+                    if current_linedata.get_description() in self.parser.WITHDRAWTRANSACTION:
+                        # Check for cancel of the transaction first
+                        if next_linedata.get_description() in self.parser.CANCELTRANSACTION:
+                            # If the Withdraw was canceled, skip both lines
+                            skip_next_line = True
+                            continue
+
                     # If you ended up here, write data into the file
-                    if parser_object.get_description() not in (self.parser.EXCLUSIONSTRINGS or
+                    if current_linedata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
                                                                self.parser.CANCELTRANSACTION):
-                        self.write_row(csv_writer, parser_object, _logging_callback)
+                        self.write_row(csv_writer, current_linedata, _logging_callback)
 
 
     def convert_csv(self, csv_writer, _logging_callback):
@@ -105,13 +135,13 @@ class ChainreportConverter():
                 current_rowdata = self.parser(current_row)
                 next_rowdata = self.parser(next_row)
 
-                        # Combine the multiline trade transaction (if there is still a next line left)
+                # Combine the multiline trade transaction (if there is still a next line left)
                 if current_rowdata.get_description() in self.parser.TRADETRANSACTION and self.parser == HiParserCsv:
                     self.handle_trade_transactions(csv_writer, current_rowdata, next_rowdata)
                     skip_next_line = True
                     continue
 
-                        # Handle canceled withdrawactions
+                # Handle canceled withdrawactions
                 if current_rowdata.get_description() in self.parser.WITHDRAWTRANSACTION:
                     # Check for cancel of the transaction first
                     if next_rowdata.get_description() in self.parser.CANCELTRANSACTION:
@@ -123,7 +153,7 @@ class ChainreportConverter():
                                                 ". The amount is 0 in the export file.")
                     self.statistics["warnings"] += 1
 
-                        # If you ended up here, write data into the file
+                # If you ended up here, write data into the file
                 if current_rowdata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
                                                                     self.parser.CANCELTRANSACTION):
                     self.write_row(csv_writer, current_rowdata, _logging_callback)
