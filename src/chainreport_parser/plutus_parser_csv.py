@@ -1,5 +1,4 @@
 """Parser implementation for HI"""
-# pylint: disable=duplicate-code
 
 from datetime import datetime
 from .chainreport_parser_interface import ChainreportParserInterface

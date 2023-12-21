@@ -32,7 +32,7 @@ class HiParserPdf(ChainreportParserInterface):
                         'Card refund',
                         'Card consume',
                         'Fiat depositIBAN',
-                        'Fiat withdraw (IBAN)'
+                        'Fiat withdraw (IBAN)',
                         'Fiat deposit BankTransfer',
                         'crypto transfer to trading', 
                         'crypto transfer to flexible']
