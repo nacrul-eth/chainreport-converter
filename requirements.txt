@@ -1,0 +1,3 @@
+pyinstaller
+kivy[base]
+PyPDF2
