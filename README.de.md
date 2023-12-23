@@ -1,6 +1,6 @@
 # chainreport-converter
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/nacrul-eth/chainreport-converter/blob/main/README.md)
-[![de](https://img.shields.io/badge/lang-pt--br-green.svg)](https://github.com/nacrul-eth/chainreport-converter/blob/main/README.de.md)
+[![de](https://img.shields.io/badge/lang-de-green.svg)](https://github.com/nacrul-eth/chainreport-converter/blob/main/README.de.md)
 
 
 Konverter Tool für <https://chain.report/> in Zusammenarbeit mit <https://kryptowoelfe.de/>
