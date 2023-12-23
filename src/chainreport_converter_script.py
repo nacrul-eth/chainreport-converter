@@ -8,7 +8,9 @@ parser = argparse.ArgumentParser(description='ChainReport converter command line
 parser.add_argument('exchange_type',
                     help='''Name of a supported exchange/blockchain, currently -
                     Name einer unterstützen Exchange/Blockchain, aktuell:
-                    - HI ''')
+                    - Hi-CSV
+                    - Hi-PDF
+                    - Plutus-CSV ''')
 parser.add_argument('input_file',
                     help='''The exchange/blockchain filename (full path) -
                     Der Name von der Echange/Blockchain Datei (vollständiger Pfad)''')
