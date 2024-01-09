@@ -159,6 +159,21 @@ class ChainreportConverter():
                     self.write_row(csv_writer, current_rowdata, _logging_callback)
         csvinput.close()
 
+    def convert_plutus_csv(self, csv_writer, _logging_callback):
+        """Convert the plutus csv to a compatible chainreport file depending on the parser selection"""
+
+        with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
+            reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
+
+            for row in reader:
+                self.statistics["input_linecount"] += 1
+                current_rowdata = self.parser(row)
+
+                if current_rowdata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
+                                                                    self.parser.CANCELTRANSACTION):
+                    self.write_row(csv_writer, current_rowdata, _logging_callback)
+        csvinput.close()
+
     def convert(self, _logging_callback = None):
         """Main conversion function: 
         Convert the input file to a compatible chainreport file depending on the parser selection"""
@@ -175,8 +190,10 @@ class ChainreportConverter():
             if self.inputtype == "pdf":
                 self.convert_pdf(writer, _logging_callback)
             elif self.inputtype == "csv":
-                self.convert_csv(writer, _logging_callback)
-
+                if self.parser_type == "Plutus-CSV":
+                    self.convert_plutus_csv(writer, _logging_callback)
+                else:
+                    self.convert_csv(writer, _logging_callback)
             csvoutput.close()
 
         if _logging_callback:
