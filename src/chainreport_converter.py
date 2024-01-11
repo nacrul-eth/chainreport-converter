@@ -90,10 +90,9 @@ class ChainreportConverter():
                             saved_linedata = current_linedata
                             continue
                         # Or handle both lines and reset the saved_linedata
-                        else:
-                            self.handle_trade_transactions(csv_writer, saved_linedata, current_linedata)
-                            saved_linedata = None
-                            continue
+                        self.handle_trade_transactions(csv_writer, saved_linedata, current_linedata)
+                        saved_linedata = None
+                        continue
 
                     # Handle withdrawactions (store them first in case they get canceled later)
                     if current_linedata.get_description() in self.parser.WITHDRAWTRANSACTION:
