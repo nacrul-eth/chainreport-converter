@@ -125,57 +125,57 @@ class ChainreportConverter():
 
         with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
             reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
-            skip_next_line = False
-            next_row = next(reader)
+            saved_linedata = None
+            saved_withdrawdata = None
 
-            for row in reader:
+            for line in reader:
                 self.statistics["input_linecount"] += 1
-                # Populate required parameters
-                current_row, next_row = next_row, row
-                # Skip this line as well (didnt figure out skipping 2 lines yet)
-                if skip_next_line:
-                    skip_next_line = False
-                    continue
-                current_rowdata = self.parser(current_row)
-                next_rowdata = self.parser(next_row)
-
+                current_linedata = self.parser(line)
                 # Combine the multiline trade transaction (if there is still a next line left)
-                if current_rowdata.get_description() in self.parser.TRADETRANSACTION and self.parser == HiParserCsv:
-                    self.handle_trade_transactions(csv_writer, current_rowdata, next_rowdata)
-                    skip_next_line = True
+                if (current_linedata.get_description() in self.parser.TRADETRANSACTION
+                        and self.parser == HiParserCsv):
+                    # Store current (first) line of the multiline transaction
+                    if not saved_linedata:
+                        saved_linedata = current_linedata
+                        continue
+                    # Or handle both lines and reset the saved_linedata
+                    self.handle_trade_transactions(csv_writer, saved_linedata, current_linedata)
+                    saved_linedata = None
                     continue
 
-                # Handle canceled withdrawactions
-                if current_rowdata.get_description() in self.parser.WITHDRAWTRANSACTION:
-                    # Check for cancel of the transaction first
-                    if next_rowdata.get_description() in self.parser.CANCELTRANSACTION:
-                        # If the Withdraw was canceled, skip both lines
-                        skip_next_line = True
-                        continue
-                    if _logging_callback:
-                        _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
-                                                ". The amount is 0 in the export file.")
-                    self.statistics["warnings"] += 1
+                # Handle withdrawactions (store them first in case they get canceled later)
+                if current_linedata.get_description() in self.parser.WITHDRAWTRANSACTION:
+                    if saved_withdrawdata:
+                        self.write_row(csv_writer, saved_withdrawdata, _logging_callback)
+                        if _logging_callback:
+                            _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
+                                                    ". The amount is 0 in the export file.")
+                        self.statistics["warnings"] += 1
+                    saved_withdrawdata = current_linedata
+                    continue
+
+                # Check cancel of the transaction first
+                if current_linedata.get_description() in self.parser.CANCELTRANSACTION:
+                    saved_withdrawdata = None
+                    continue
 
                 # If you ended up here, write data into the file
-                if current_rowdata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
-                                                                    self.parser.CANCELTRANSACTION):
-                    self.write_row(csv_writer, current_rowdata, _logging_callback)
-        csvinput.close()
+                if current_linedata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
+                                                            self.parser.CANCELTRANSACTION):
+                    self.write_row(csv_writer, current_linedata, _logging_callback)
+        # Write all stored lines at the end as well
+        if saved_withdrawdata:
+            self.write_row(csv_writer, saved_withdrawdata, _logging_callback)
+            if _logging_callback:
+                _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
+                                        ". The amount is 0 in the export file.")
+            self.statistics["warnings"] += 1
+        if saved_linedata:
+            if _logging_callback:
+                _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
+                                        ". A multi-line transaction only had 1 line")
+            self.statistics["errors"] += 1
 
-    def convert_plutus_csv(self, csv_writer, _logging_callback):
-        """Convert the plutus csv to a compatible chainreport file depending on the parser selection"""
-
-        with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
-            reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
-
-            for row in reader:
-                self.statistics["input_linecount"] += 1
-                current_rowdata = self.parser(row)
-
-                if current_rowdata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
-                                                                    self.parser.CANCELTRANSACTION):
-                    self.write_row(csv_writer, current_rowdata, _logging_callback)
         csvinput.close()
 
     def convert(self, _logging_callback = None):
@@ -194,10 +194,7 @@ class ChainreportConverter():
             if self.inputtype == "pdf":
                 self.convert_pdf(writer, _logging_callback)
             elif self.inputtype == "csv":
-                if self.parser_type == "Plutus-CSV":
-                    self.convert_plutus_csv(writer, _logging_callback)
-                else:
-                    self.convert_csv(writer, _logging_callback)
+                self.convert_csv(writer, _logging_callback)
             csvoutput.close()
 
         if _logging_callback:
@@ -207,11 +204,12 @@ class ChainreportConverter():
             Written lines: """ + str(self.statistics["output_linecount"]))
             if self.statistics["warnings"] != 0:
                 _logging_callback("""
-                Number of Warnings: """ + str(self.statistics["warnings"]) + """ - Please check above""")
+            Number of Warnings: """ + str(self.statistics["warnings"]) + """ - Please check above""")
             if self.statistics["errors"] != 0:
                 _logging_callback("""
-                Number of Errors: """ + str(self.statistics["errors"]) + """ - Please report them""")
-            _logging_callback("""For more details check here:
+            Number of Errors: """ + str(self.statistics["errors"]) + """ - Please report them""")
+            _logging_callback("""
+            For more details check here:
             https://github.com/nacrul-eth/chainreport-converter/wiki/HiParser/""" + self.parser.NAME + """
             ----------------------------------------------------------------------""")
 
