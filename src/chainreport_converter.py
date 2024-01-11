@@ -6,7 +6,7 @@ from PyPDF2 import PdfReader
 from chainreport_parser.hi_parser_csv import HiParserCsv
 from chainreport_parser.hi_parser_pdf import HiParserPdf
 from chainreport_parser.plutus_parser_csv import PlutusParserCsv
-
+from chainreport_parser.nexo_parser_csv import NexoParserCsv
 
 class ChainreportConverter():
     """Main Class handling the csv files (open, close) and the conversion of the content"""
@@ -30,6 +30,9 @@ class ChainreportConverter():
             self.inputtype = "pdf"
         elif parsertype == "Plutus-CSV":
             self.parser = PlutusParserCsv
+            self.inputtype = "csv"
+        elif parsertype == "Nexo-CSV":
+            self.parser = NexoParserCsv
             self.inputtype = "csv"
         else:
             return
@@ -115,8 +118,21 @@ class ChainreportConverter():
                                                                self.parser.CANCELTRANSACTION):
                         self.write_row(csv_writer, current_linedata, _logging_callback)
 
-
     def convert_csv(self, csv_writer, _logging_callback):
+        """Convert the plutus csv to a compatible chainreport file depending on the parser selection"""
+
+        with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
+            reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
+
+            for row in reader:
+                self.statistics["input_linecount"] += 1
+                current_rowdata = self.parser(row)
+                if current_rowdata.get_transaction_type() == self.parser.SKIP_STR:
+                    continue
+
+                self.write_row(csv_writer, current_rowdata, _logging_callback)
+        csvinput.close()
+    def convert_hi_csv(self, csv_writer, _logging_callback):
         """Convert the input csv to a compatible chainreport file depending on the parser selection"""
 
         with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
@@ -128,13 +144,16 @@ class ChainreportConverter():
                 self.statistics["input_linecount"] += 1
                 # Populate required parameters
                 current_row, next_row = next_row, row
+
                 # Skip this line as well (didnt figure out skipping 2 lines yet)
                 if skip_next_line:
                     skip_next_line = False
                     continue
                 current_rowdata = self.parser(current_row)
                 next_rowdata = self.parser(next_row)
-
+                # maybe sutable for hi-parser as well: whatever needs to be skipped as row type with "Skip"
+                if current_rowdata.get_transaction_type() == self.parser.SKIP_STR:
+                    continue
                 # Combine the multiline trade transaction (if there is still a next line left)
                 if current_rowdata.get_description() in self.parser.TRADETRANSACTION and self.parser == HiParserCsv:
                     self.handle_trade_transactions(csv_writer, current_rowdata, next_rowdata)
@@ -157,22 +176,12 @@ class ChainreportConverter():
                 if current_rowdata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
                                                                     self.parser.CANCELTRANSACTION):
                     self.write_row(csv_writer, current_rowdata, _logging_callback)
+            # Check seperat last line
+            if next_rowdata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
+                                                                 self.parser.CANCELTRANSACTION):
+                self.write_row(csv_writer, next_rowdata, _logging_callback)
         csvinput.close()
 
-    def convert_plutus_csv(self, csv_writer, _logging_callback):
-        """Convert the plutus csv to a compatible chainreport file depending on the parser selection"""
-
-        with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
-            reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
-
-            for row in reader:
-                self.statistics["input_linecount"] += 1
-                current_rowdata = self.parser(row)
-
-                if current_rowdata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
-                                                                    self.parser.CANCELTRANSACTION):
-                    self.write_row(csv_writer, current_rowdata, _logging_callback)
-        csvinput.close()
 
     def convert(self, _logging_callback = None):
         """Main conversion function: 
@@ -190,8 +199,8 @@ class ChainreportConverter():
             if self.inputtype == "pdf":
                 self.convert_pdf(writer, _logging_callback)
             elif self.inputtype == "csv":
-                if self.parser_type == "Plutus-CSV":
-                    self.convert_plutus_csv(writer, _logging_callback)
+                if self.parser_type == "HI-CSV":
+                    self.convert_hi_csv(writer, _logging_callback)
                 else:
                     self.convert_csv(writer, _logging_callback)
             csvoutput.close()

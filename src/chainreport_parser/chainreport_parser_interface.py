@@ -3,6 +3,8 @@
 import abc
 
 class ChainreportParserInterface(metaclass=abc.ABCMeta):
+
+    SKIP_STR = "Skip_Row"
     """Parser Interface with runtime error on missing implementation"""
     @classmethod
     def __subclasshook__(cls, subclass):
