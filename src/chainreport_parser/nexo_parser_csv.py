@@ -72,7 +72,7 @@ class NexoParserCsv(ChainreportParserInterface):
         """Return amount of received coins"""
         if self.input_row['Type'] in NexoParserCsv.TRADETRANSACTION:
             return self.input_row['Output Amount'].replace(".", ",")
-        if self.input_row['Type'] in NexoParserCsv.PAYMENTTRANSACTION:
+        if self.input_row['Type'] in NexoParserCsv.PAYMENTTRANSACTION + NexoParserCsv.WITHDRAWTRANSACTION:
             return ""
         return self.input_row['Input Amount'].replace(".", ",")
 
@@ -80,7 +80,7 @@ class NexoParserCsv(ChainreportParserInterface):
         """Return currency of receveid coins"""
         if self.input_row['Type'] in NexoParserCsv.TRADETRANSACTION:
             return self.input_row['Output Currency']
-        if self.input_row['Type'] in NexoParserCsv.PAYMENTTRANSACTION:
+        if self.input_row['Type'] in NexoParserCsv.PAYMENTTRANSACTION + NexoParserCsv.WITHDRAWTRANSACTION:
             return ""
         return self.input_row['Input Currency']
 
