@@ -94,7 +94,7 @@ class HiParserPdf(ChainreportParserInterface):
     def get_sent_amount(self):
         """Return amount of sent coins"""
         if self.amount.startswith("-"):
-            return self.amount
+            return self.amount.lstrip("-")
         return ""
 
     def get_sent_currency(self):
