@@ -6,7 +6,7 @@ from PyPDF2 import PdfReader
 from chainreport_parser.hi_parser_csv import HiParserCsv
 from chainreport_parser.hi_parser_pdf import HiParserPdf
 from chainreport_parser.plutus_parser_csv import PlutusParserCsv
-
+from chainreport_parser.nexo_parser_csv import NexoParserCsv
 
 class ChainreportConverter():
     """Main Class handling the csv files (open, close) and the conversion of the content"""
@@ -30,6 +30,9 @@ class ChainreportConverter():
             self.inputtype = "pdf"
         elif parsertype == "Plutus-CSV":
             self.parser = PlutusParserCsv
+            self.inputtype = "csv"
+        elif parsertype == "Nexo-CSV":
+            self.parser = NexoParserCsv
             self.inputtype = "csv"
         else:
             return
@@ -124,6 +127,20 @@ class ChainreportConverter():
 
         with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
             reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
+
+            for row in reader:
+                self.statistics["input_linecount"] += 1
+                current_rowdata = self.parser(row)
+                if current_rowdata.get_transaction_type() == self.parser.SKIP_STR:
+                    continue
+
+                self.write_row(csv_writer, current_rowdata, _logging_callback)
+        csvinput.close()
+    def convert_hi_csv(self, csv_writer, _logging_callback):
+        """Convert the hi csv to a compatible chainreport file"""
+
+        with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
+            reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
             saved_linedata = None
             saved_withdrawdata = None
 
@@ -176,6 +193,7 @@ class ChainreportConverter():
             self.statistics["errors"] += 1
 
         csvinput.close()
+
 
     def convert(self, _logging_callback = None):
         """Main conversion function: 

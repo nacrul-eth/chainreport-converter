@@ -10,6 +10,7 @@ parser.add_argument('exchange_type',
                     Name einer unterstützen Exchange/Blockchain, aktuell:
                     - Hi-CSV
                     - Hi-PDF
+                    - Nexo-CSV
                     - Plutus-CSV ''')
 parser.add_argument('input_file',
                     help='''The exchange/blockchain filename (full path) -
