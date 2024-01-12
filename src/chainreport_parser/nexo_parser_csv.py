@@ -1,10 +1,10 @@
-"""Parser implementation for HI"""
+"""Parser implementation for Nexo"""
 
 from datetime import datetime
 from .chainreport_parser_interface import ChainreportParserInterface
 
 class NexoParserCsv(ChainreportParserInterface):
-    """Extract all required information from Hi statement."""
+    """Extract all required information from Nexo csv."""
 
     def __init__(self, row):
         self.input_row = row
@@ -88,11 +88,13 @@ class NexoParserCsv(ChainreportParserInterface):
         """Return amount of sent coins"""
         if self.input_row['Type'] in NexoParserCsv.POSSIBLE_OUTPUT:
             return self.input_row['Input Amount'].replace(".", ",")
+        return None
 
     def get_sent_currency(self):
         """Return currency of sent coins"""
         if self.input_row['Type'] in NexoParserCsv.POSSIBLE_OUTPUT:
             return self.input_row['Input Currency']
+        return None
 
     def get_transaction_fee_amount(self):
         """Return amount of transaction fee coins"""

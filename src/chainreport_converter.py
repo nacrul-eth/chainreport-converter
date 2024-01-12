@@ -123,7 +123,7 @@ class ChainreportConverter():
             self.statistics["errors"] += 1
 
     def convert_csv(self, csv_writer, _logging_callback):
-        """Convert the plutus csv to a compatible chainreport file depending on the parser selection"""
+        """Convert the input csv to a compatible chainreport file depending on the parser selection"""
 
         with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
             reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
@@ -137,7 +137,7 @@ class ChainreportConverter():
                 self.write_row(csv_writer, current_rowdata, _logging_callback)
         csvinput.close()
     def convert_hi_csv(self, csv_writer, _logging_callback):
-        """Convert the input csv to a compatible chainreport file depending on the parser selection"""
+        """Convert the hi csv to a compatible chainreport file"""
 
         with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
             reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
