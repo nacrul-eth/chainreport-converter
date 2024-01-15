@@ -26,16 +26,16 @@ class HiParserPdf(ChainreportParserInterface):
     STAKINGTRANSACTION = ['Crypto staking yields HI']
     WITHDRAWTRANSACTION = ['crypto send',
                            'Crypto withdraw']
-    EXCLUSIONSTRINGS = ['Vault HI daily release',
-                        'Crypto earning stake',
-                        'Crypto earning release',
-                        'Card refund',
-                        'Card consume',
-                        'Fiat depositIBAN',
-                        'Fiat withdraw (IBAN)',
-                        'Fiat deposit BankTransfer',
-                        'crypto transfer to trading', 
-                        'crypto transfer to flexible']
+    SKIPSTRINGS = ['Vault HI daily release',
+                   'Crypto earning stake',
+                   'Crypto earning release',
+                   'Card refund',
+                   'Card consume',
+                   'Fiat depositIBAN',
+                   'Fiat withdraw (IBAN)',
+                   'Fiat deposit BankTransfer',
+                   'crypto transfer to trading', 
+                   'crypto transfer to flexible']
     REFERRALSTRING = ['HI referrer reward',
                       'HI referrer rebate']
     TRADETRANSACTION = ['buy Vault HI', # 1. Hi splits trade into two lines
@@ -45,6 +45,11 @@ class HiParserPdf(ChainreportParserInterface):
     AIRDROPTRANSACTION = ['crypto cashhash redeem']
     CANCELTRANSACTION = ['Crypto cancel withdraw']
     OTHERINCOMETRANSACTION = ['Yields']
+
+    def check_if_skip_line(self):
+        """Return true, if the line should be skipped
+           return false, if the line is relevant"""
+        return self.description in self.SKIPSTRINGS
 
     def get_input_string(self):
         """Return the input data we are using"""

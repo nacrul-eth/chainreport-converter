@@ -85,6 +85,11 @@ class ChainreportConverter():
                 if line.startswith("20"):
                     self.statistics["input_linecount"] += 1
                     current_linedata = self.parser(line)
+
+                    if current_linedata.check_if_skip_line():
+                        self.statistics["ignored"] += 1
+                        continue
+
                     # Combine the multiline trade transaction (if there is still a next line left)
                     if (current_linedata.get_description() in self.parser.TRADETRANSACTION
                             and self.parser == HiParserPdf):
@@ -110,9 +115,8 @@ class ChainreportConverter():
                         continue
 
                     # If you ended up here, write data into the file
-                    if current_linedata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
-                                                               self.parser.CANCELTRANSACTION):
-                        self.write_row(csv_writer, current_linedata, _logging_callback)
+                    self.write_row(csv_writer, current_linedata, _logging_callback)
+
         # Write all stored lines at the end as well
         if saved_withdrawdata:
             self.write_row(csv_writer, saved_withdrawdata, _logging_callback)
@@ -128,25 +132,16 @@ class ChainreportConverter():
         with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
             reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
 
-            for row in reader:
-                self.statistics["input_linecount"] += 1
-                current_rowdata = self.parser(row)
-                if current_rowdata.get_transaction_type() == self.parser.SKIP_STR:
-                    continue
-
-                self.write_row(csv_writer, current_rowdata, _logging_callback)
-        csvinput.close()
-    def convert_hi_csv(self, csv_writer, _logging_callback):
-        """Convert the hi csv to a compatible chainreport file"""
-
-        with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
-            reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
             saved_linedata = None
             saved_withdrawdata = None
 
             for line in reader:
                 self.statistics["input_linecount"] += 1
                 current_linedata = self.parser(line)
+                if current_linedata.check_if_skip_line():
+                    self.statistics["ignored"] += 1
+                    continue
+
                 # Combine the multiline trade transaction (if there is still a next line left)
                 if (current_linedata.get_description() in self.parser.TRADETRANSACTION
                         and self.parser == HiParserCsv):
@@ -176,9 +171,8 @@ class ChainreportConverter():
                     continue
 
                 # If you ended up here, write data into the file
-                if current_linedata.get_description() not in (self.parser.EXCLUSIONSTRINGS or
-                                                            self.parser.CANCELTRANSACTION):
-                    self.write_row(csv_writer, current_linedata, _logging_callback)
+                self.write_row(csv_writer, current_linedata, _logging_callback)
+
         # Write all stored lines at the end as well
         if saved_withdrawdata:
             self.write_row(csv_writer, saved_withdrawdata, _logging_callback)
