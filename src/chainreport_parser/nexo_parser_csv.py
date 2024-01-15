@@ -18,13 +18,13 @@ class NexoParserCsv(ChainreportParserInterface):
     LENDINGTRANSACTION = ['Interest',
                           'Fixed Term Interest']
     WITHDRAWTRANSACTION = ['Withdrawal']
-    EXCLUSIONSTRINGS = ['Exchange Deposited On',
-                        'Credit Card Fiaxt Refund',
-                        'Unlocking Term Deposit',
-                        'Locking Term Deposit',
-                        'Credit Card Fiatx Exchange To Withdraw',
-                        'Credit Card Fiatx Authorization',
-                        'Credit Card Fiatx Refund']
+    SKIPSTRINGS = ['Exchange Deposited On',
+                   'Credit Card Fiaxt Refund',
+                   'Unlocking Term Deposit',
+                   'Locking Term Deposit',
+                   'Credit Card Fiatx Exchange To Withdraw',
+                   'Credit Card Fiatx Authorization',
+                   'Credit Card Fiatx Refund']
     REFERRALSTRING = []  #unknown
     TRADETRANSACTION = ['Exchange']
     PAYMENTTRANSACTION = ['Withdraw Exchanged']
@@ -32,6 +32,11 @@ class NexoParserCsv(ChainreportParserInterface):
     CANCELTRANSACTION = [] #unknown
 
     POSSIBLE_OUTPUT = PAYMENTTRANSACTION + TRADETRANSACTION + WITHDRAWTRANSACTION
+
+    def check_if_skip_line(self):
+        """Return true, if the line should be skipped
+           return false, if the line is relevant"""
+        return self.input_row['Type'] in self.SKIPSTRINGS
 
     def get_input_string(self):
         """Return the input data we are using"""
@@ -64,8 +69,6 @@ class NexoParserCsv(ChainreportParserInterface):
             return_string = 'Airdrop'
         elif transaction_description in NexoParserCsv.LENDINGTRANSACTION:
             return_string = 'Lending'
-        elif transaction_description in NexoParserCsv.EXCLUSIONSTRINGS:
-            return_string = self.SKIP_STR
         return return_string
 
     def get_received_amount(self):

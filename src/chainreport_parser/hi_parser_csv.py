@@ -18,17 +18,17 @@ class HiParserCsv(ChainreportParserInterface):
     STAKINGTRANSACTION = ['Crypto staking yields （HI）']
     WITHDRAWTRANSACTION = ['crypto send',
                        'Crypto withdraw'] # Missing Euro Amount in CSV from Hi
-    EXCLUSIONSTRINGS = ['Vault HI daily release',
-                       'Crypto earning stake',
-                       'Crypto earning release',
-                       'Card refund',
-                       'Card consume',
-                       'Fiat deposit（IBAN）',
-                       'Fiat withdraw (IBAN)',
-                       'Fiat deposit （BankTransfer）',
-                       'Yields', 
-                       'crypto transfer to trading', 
-                       'crypto transfer to flexible']
+    SKIPSTRINGS = ['Vault HI daily release',
+                   'Crypto earning stake',
+                   'Crypto earning release',
+                   'Card refund',
+                   'Card consume',
+                   'Fiat deposit（IBAN）',
+                   'Fiat withdraw (IBAN)',
+                   'Fiat deposit （BankTransfer）',
+                   'Yields', 
+                   'crypto transfer to trading', 
+                   'crypto transfer to flexible']
     REFERRALSTRING = ['HI referrer reward',
                       'HI referrer rebate']
     TRADETRANSACTION = ['buy Vault HI', # 1. Hi splits trade into two lines
@@ -37,6 +37,11 @@ class HiParserCsv(ChainreportParserInterface):
     PAYMENTTRANSACTION = ['convert'] # Missing Euro Amount in CSV from Hi
     AIRDROPTRANSACTION = ['crypto cashhash redeem']
     CANCELTRANSACTION = ['Crypto cancel withdraw']
+
+    def check_if_skip_line(self):
+        """Return true, if the line should be skipped
+           return false, if the line is relevant"""
+        return self.input_row['Description'] in self.SKIPSTRINGS
 
     def get_input_string(self):
         """Return the input data we are using"""

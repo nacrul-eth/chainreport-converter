@@ -9,7 +9,9 @@ class ChainreportParserInterface(metaclass=abc.ABCMeta):
 
     @classmethod
     def __subclasshook__(cls, subclass):
-        return (hasattr(subclass, 'get_date_string') and
+        return (hasattr(subclass, 'check_if_skip_line') and
+                callable(subclass.check_if_skip_line) and
+                hasattr(subclass, 'get_date_string') and
                 callable(subclass.get_date_string) and
                 hasattr(subclass, 'get_transaction_type') and
                 callable(subclass.get_transaction_type) and
@@ -32,8 +34,14 @@ class ChainreportParserInterface(metaclass=abc.ABCMeta):
                 NotImplemented)
 
     @abc.abstractmethod
+    def check_if_skip_line(self):
+        """Return true, if the line should be skipped
+           return false, if the line is relevant"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def get_date_string(self):
-        """Return datestring in Chainreport format"""   
+        """Return datestring in Chainreport format"""
         raise NotImplementedError
 
     @abc.abstractmethod
