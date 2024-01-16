@@ -30,6 +30,7 @@ class NexoParserCsv(ChainreportParserInterface):
     PAYMENTTRANSACTION = ['Withdraw Exchanged']
     AIRDROPTRANSACTION = [] #unknown
     CANCELTRANSACTION = [] #unknown
+    OTHERINCOME = ['Referral Bonus']
 
     POSSIBLE_OUTPUT = PAYMENTTRANSACTION + TRADETRANSACTION + WITHDRAWTRANSACTION
 
@@ -69,6 +70,8 @@ class NexoParserCsv(ChainreportParserInterface):
             return_string = 'Airdrop'
         elif transaction_description in NexoParserCsv.LENDINGTRANSACTION:
             return_string = 'Lending'
+        elif transaction_description in NexoParserCsv.OTHERINCOME:
+            return_string = 'Other_Income'
         return return_string
 
     def get_received_amount(self):
