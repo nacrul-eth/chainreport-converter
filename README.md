@@ -22,7 +22,6 @@ Currently the following exchanges/blockchains are supported:
 - Hi-CSV (<https://hi.com>): Original, but limited version (No withdraw amounts in the Hi statement)
 - Hi-PDF (<https://hi.com>): New, PDF based version with all transactions supported
 - Plutus (<https://plutus.it>): Csv Rewards export only using the Plutus Dashboard extension as described in the [Wiki](https://github.com/nacrul-eth/chainreport-converter/wiki/PlutusParserCsv)
-- Nexo (<https://nexo.com>): Csv export directly
 
 
 For additional blockchain/exchange support please open a github-ticket or join the kryptowoelfe telegram (german crypto community) 
