@@ -26,7 +26,7 @@ class PlutusParserCsv(ChainreportParserInterface):
     def check_if_skip_line(self):
         """Return true, if the line should be skipped
            return false, if the line is relevant"""
-        return self.input_row['Description'] in self.SKIPSTRINGS
+        return self.input_row['description'] in self.SKIPSTRINGS
 
     def get_input_string(self):
         """Return the input data we are using"""
