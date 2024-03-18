@@ -14,13 +14,12 @@ You can start the GUI application manually on Linux, Mac (and Windows) (with pyt
 Alternativly you can create a chainreport csv-file by executing the following command line:
 
     python3 src/chainreport-converter.py "exchange type" "input-file" "output-file"
-    => python3 src/chainreport_converter_script.py Hi-PDF hi-statement.pdf chainreport.csv
+    => python3 src/chainreport_converter_script.py Hi hi-statement.pdf chainreport.csv
 
 ## Current support
 Currently the following exchanges/blockchains are supported:
 
-- Hi-CSV (<https://hi.com>): Original, but limited version (No withdraw amounts in the Hi statement)
-- Hi-PDF (<https://hi.com>): New, PDF based version with all transactions supported
+- Hi (<https://hi.com>): CSV Original, but limited version (No withdraw amounts in the Hi statement) or New, PDF based version with all transactions supported
 - Plutus (<https://plutus.it>): Csv Rewards export only using the Plutus Dashboard extension as described in the [Wiki](https://github.com/nacrul-eth/chainreport-converter/wiki/PlutusParserCsv)
 
 
