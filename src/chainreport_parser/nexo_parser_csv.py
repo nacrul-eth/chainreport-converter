@@ -19,7 +19,6 @@ class NexoParserCsv(ChainreportParserInterface):
                           'Fixed Term Interest']
     WITHDRAWTRANSACTION = ['Withdrawal']
     SKIPSTRINGS = ['Exchange Deposited On',
-                   'Credit Card Fiaxt Refund',
                    'Unlocking Term Deposit',
                    'Locking Term Deposit',
                    'Credit Card Fiatx Exchange To Withdraw',

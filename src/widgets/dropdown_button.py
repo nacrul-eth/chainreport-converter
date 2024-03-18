@@ -16,7 +16,7 @@ class DropdownButton(Button):
         self.drop_list = None
         self.drop_list = DropDown()
 
-        parsers = ['Hi', 'Plutus', 'Nexo']
+        parsers = ['Hi', 'Plutus']
 
         for parser in parsers:
             btn = Button(text=parser, size_hint_y=None, height=50)
