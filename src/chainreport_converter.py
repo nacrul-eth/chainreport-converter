@@ -22,16 +22,23 @@ class ChainreportConverter():
         self.chainreport_filename = outputfile
         self.input_filename = inputfile
         self.parser_type = parsertype
-        if parsertype == "Hi-CSV":
-            self.parser = HiParserCsv
-            self.inputtype = "csv"
-        elif parsertype == "Hi-PDF":
-            self.parser = HiParserPdf
+        if self.input_filename.lower().endswith(".pdf"):
             self.inputtype = "pdf"
-        elif parsertype == "Plutus-CSV":
+        elif self.input_filename.lower().endswith(".csv"):
+            self.inputtype = "csv"
+        else:
+            self.inputtype = None
+            return
+
+        if parsertype == "Hi":
+            if self.inputtype == "csv":
+                self.parser = HiParserCsv
+            elif self.inputtype == "pdf":
+                self.parser = HiParserPdf
+        elif parsertype == "Plutus":
             self.parser = PlutusParserCsv
             self.inputtype = "csv"
-        elif parsertype == "Nexo-CSV":
+        elif parsertype == "Nexo":
             self.parser = NexoParserCsv
             self.inputtype = "csv"
         else:
