@@ -37,7 +37,8 @@ class HiParserCsv(ChainreportParserInterface):
     PAYMENTTRANSACTION = ['convert'] # Missing Euro Amount in CSV from Hi
     AIRDROPTRANSACTION = []
     CANCELTRANSACTION = ['Crypto cancel withdraw']
-    OTHERINCOMETRANSACTION = ['crypto cashhash redeem']
+    OTHERINCOMETRANSACTION = ['Yields',
+                              'crypto cashhash redeem']
 
     def check_if_skip_line(self):
         """Return true, if the line should be skipped
