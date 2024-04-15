@@ -35,8 +35,9 @@ class HiParserCsv(ChainreportParserInterface):
                         'buy HI paid',  # 2. Hi splits trade into two lines
                         'Dust to HI']
     PAYMENTTRANSACTION = ['convert'] # Missing Euro Amount in CSV from Hi
-    AIRDROPTRANSACTION = ['crypto cashhash redeem']
+    AIRDROPTRANSACTION = []
     CANCELTRANSACTION = ['Crypto cancel withdraw']
+    OTHERINCOMETRANSACTION = ['crypto cashhash redeem']
 
     def check_if_skip_line(self):
         """Return true, if the line should be skipped
@@ -72,6 +73,8 @@ class HiParserCsv(ChainreportParserInterface):
             return_string = 'Payment'
         elif transaction_description in HiParserCsv.AIRDROPTRANSACTION:
             return_string = 'Airdrop'
+        elif transaction_description in HiParserCsv.OTHERINCOMETRANSACTION:
+            return_string = 'Other_Income'
 
         return return_string
 

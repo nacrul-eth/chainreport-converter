@@ -42,9 +42,10 @@ class HiParserPdf(ChainreportParserInterface):
                         'buy HI paid',  # 2. Hi splits trade into two lines
                         'Dust to HI']
     PAYMENTTRANSACTION = ['convert']
-    AIRDROPTRANSACTION = ['crypto cashhash redeem']
+    AIRDROPTRANSACTION = []
     CANCELTRANSACTION = ['Crypto cancel withdraw']
-    OTHERINCOMETRANSACTION = ['Yields']
+    OTHERINCOMETRANSACTION = ['Yields',
+                              'crypto cashhash redeem']
 
     def check_if_skip_line(self):
         """Return true, if the line should be skipped
