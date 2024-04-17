@@ -7,6 +7,7 @@ from chainreport_parser.hi_parser_csv import HiParserCsv
 from chainreport_parser.hi_parser_pdf import HiParserPdf
 from chainreport_parser.plutus_parser_csv import PlutusParserCsv
 from chainreport_parser.nexo_parser_csv import NexoParserCsv
+from chainreport_parser.ethereum_parser_csv import EthereumParserCsv
 
 class ChainreportConverter():
     """Main Class handling the csv files (open, close) and the conversion of the content"""
@@ -40,6 +41,9 @@ class ChainreportConverter():
             self.inputtype = "csv"
         elif parsertype == "Nexo":
             self.parser = NexoParserCsv
+            self.inputtype = "csv"
+        elif parsertype == "Ethereum":
+            self.parser = EthereumParserCsv
             self.inputtype = "csv"
         else:
             return
