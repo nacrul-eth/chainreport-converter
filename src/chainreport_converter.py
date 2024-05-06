@@ -7,6 +7,7 @@ from chainreport_parser.hi_parser_csv import HiParserCsv
 from chainreport_parser.hi_parser_pdf import HiParserPdf
 from chainreport_parser.plutus_parser_csv import PlutusParserCsv
 from chainreport_parser.nexo_parser_csv import NexoParserCsv
+from chainreport_parser.kraken_parser import KrakenParserCsv
 
 class ChainreportConverter():
     """Main Class handling the csv files (open, close) and the conversion of the content"""
@@ -40,6 +41,9 @@ class ChainreportConverter():
             self.inputtype = "csv"
         elif parsertype == "Nexo":
             self.parser = NexoParserCsv
+            self.inputtype = "csv"
+        elif parsertype == "Kraken":
+            self.parser = KrakenParserCsv
             self.inputtype = "csv"
         else:
             return
@@ -151,7 +155,7 @@ class ChainreportConverter():
 
                 # Combine the multiline trade transaction (if there is still a next line left)
                 if (current_linedata.get_description() in self.parser.TRADETRANSACTION
-                        and self.parser == HiParserCsv):
+                        and (self.parser == HiParserCsv or self.parser == KrakenParserCsv)):
                     # Store current (first) line of the multiline transaction
                     if not saved_linedata:
                         saved_linedata = current_linedata
@@ -165,10 +169,11 @@ class ChainreportConverter():
                 if current_linedata.get_description() in self.parser.WITHDRAWTRANSACTION:
                     if saved_withdrawdata:
                         self.write_row(csv_writer, saved_withdrawdata, _logging_callback)
-                        if _logging_callback:
-                            _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
-                                                    ". The amount is 0 in the export file.")
-                        self.statistics["warnings"] += 1
+                        if self.parser == HiParserCsv:
+                            if _logging_callback:
+                                _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
+                                                        ". The amount is 0 in the export file.")
+                            self.statistics["warnings"] += 1
                     saved_withdrawdata = current_linedata
                     continue
 
@@ -183,10 +188,11 @@ class ChainreportConverter():
         # Write all stored lines at the end as well
         if saved_withdrawdata:
             self.write_row(csv_writer, saved_withdrawdata, _logging_callback)
-            if _logging_callback:
-                _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
-                                        ". The amount is 0 in the export file.")
-            self.statistics["warnings"] += 1
+            if self.parser == HiParserCsv:
+                if _logging_callback:
+                    _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
+                                            ". The amount is 0 in the export file.")
+                self.statistics["warnings"] += 1
         if saved_linedata:
             if _logging_callback:
                 _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
@@ -237,6 +243,8 @@ class ChainreportConverter():
         receive_currency = ""
         sent_amount = ""
         sent_currency = ""
+        transaction_fee = ""
+        transaction_currency = ""
 
         if current_linedata.get_received_amount():
             receive_amount = current_linedata.get_received_amount()
@@ -249,14 +257,21 @@ class ChainreportConverter():
             sent_amount = current_linedata.get_sent_amount()
             sent_currency = current_linedata.get_sent_currency()
 
+        if current_linedata.get_transaction_fee_amount() != "0":
+            transaction_fee = current_linedata.get_transaction_fee_amount()
+            transaction_currency = current_linedata.get_transaction_fee_currency()
+        else:
+            transaction_fee = next_linedata.get_transaction_fee_amount()
+            transaction_currency = next_linedata.get_transaction_fee_currency()
+
         writer.writerow({self.DATESTRING_CR: current_linedata.get_date_string(),
                                          self.TRANSACTIONTYP_CR: current_linedata.get_transaction_type(),
                                          self.RECEIVED_AMOUNT_CR: receive_amount,
                                          self.RECEIVED_CURRENCY_CR: receive_currency,
                                          self.SENT_AMOUNT_CR: sent_amount,
                                          self.SENT_CURRENCY_CR: sent_currency,
-                                         self.TRANS_FEE_AMOUNT_CR: current_linedata.get_transaction_fee_amount(),
-                                         self.TRANS_FEE_CURRENCY_CR: current_linedata.get_transaction_fee_currency(),
+                                         self.TRANS_FEE_AMOUNT_CR: transaction_fee,
+                                         self.TRANS_FEE_CURRENCY_CR: transaction_currency,
                                          self.ORDERID_CR: current_linedata.get_order_id(),
                                          self.DESCRIPTION_CR: current_linedata.get_description()})
         self.statistics["output_linecount"] += 1
