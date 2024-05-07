@@ -8,6 +8,7 @@ from chainreport_parser.hi_parser_pdf import HiParserPdf
 from chainreport_parser.plutus_parser_csv import PlutusParserCsv
 from chainreport_parser.nexo_parser_csv import NexoParserCsv
 from chainreport_parser.coinbase_pro import CoinbaseProParserCsv
+from chainreport_parser.coinbase import CoinbaseParserCsv
 
 class ChainreportConverter():
     """Main Class handling the csv files (open, close) and the conversion of the content"""
@@ -44,6 +45,9 @@ class ChainreportConverter():
             self.inputtype = "csv"
         elif parsertype == "Coinbase Pro":
             self.parser = CoinbaseProParserCsv
+            self.inputtype = "csv"
+        elif parsertype == "Coinbase":
+            self.parser = CoinbaseParserCsv
             self.inputtype = "csv"
         else:
             return
@@ -141,6 +145,8 @@ class ChainreportConverter():
         """Convert the input csv to a compatible chainreport file depending on the parser selection"""
 
         with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
+            # for line in range(3):
+            #     csvinput.next()
             reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
 
             saved_linedata = None
