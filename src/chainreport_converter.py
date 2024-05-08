@@ -145,8 +145,13 @@ class ChainreportConverter():
         """Convert the input csv to a compatible chainreport file depending on the parser selection"""
 
         with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
-            # for line in range(3):
-            #     csvinput.next()
+            try:
+                for line in range(self.parser.SKIPINITIALLINES):
+                    csvinput.readline()
+            except AttributeError:
+                # Expected behaviour for csv files without useless content in the first lines
+                _logging_callback("")
+
             reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
 
             saved_linedata = None

@@ -20,6 +20,7 @@ class CoinbaseParserCsv(ChainreportParserInterface):
 
     NAME = __qualname__
     DELIMITER=","
+    SKIPINITIALLINES=3
     CASHBACKTRANSACTION = []
     DEPOSITTRANSACTION = ['Deposit']
     STAKINGTRANSACTION = []
