@@ -23,8 +23,8 @@ class CoinbaseParserCsv(ChainreportParserInterface):
     SKIPINITIALLINES=3
     CASHBACKTRANSACTION = []
     DEPOSITTRANSACTION = ['Deposit']
-    STAKINGTRANSACTION = []
-    WITHDRAWTRANSACTION = []
+    STAKINGTRANSACTION = ['Staking Income']
+    WITHDRAWTRANSACTION = ['Send']
     SKIPSTRINGS = []
     REFERRALSTRING = []
     TRADETRANSACTION = ['Buy']
@@ -59,6 +59,8 @@ class CoinbaseParserCsv(ChainreportParserInterface):
             return_string = 'Trade'
         if transaction_description in CoinbaseParserCsv.OTHERINCOMETRANSACTION:
             return_string = 'Other_Income'
+        if transaction_description in CoinbaseParserCsv.STAKINGTRANSACTION:
+            return_string = 'Staking'
         return return_string
 
     def get_received_amount(self):
