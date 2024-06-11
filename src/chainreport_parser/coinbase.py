@@ -1,10 +1,10 @@
-"""Parser implementation for HI"""
+"""Parser implementation for Coinbase export file."""
 
 from datetime import datetime
 from .chainreport_parser_interface import ChainreportParserInterface
 
 class CoinbaseParserCsv(ChainreportParserInterface):
-    """Extract all required information from Plutus Rewards file."""
+    """Extract all required information from Coinbase export file."""
 
     def __init__(self, row):
         self.input_row = row
@@ -35,12 +35,33 @@ class CoinbaseParserCsv(ChainreportParserInterface):
     OTHERINCOMETRANSACTION = ['Receive']
 
     def check_if_skip_line(self):
-        """Return true, if the line should be skipped
-           return false, if the line is relevant"""
+        """
+        Check if the current transaction line should be skipped based on the transaction type.
+
+        Returns:
+        bool: True if the line should be skipped, False otherwise.
+
+        The function checks if the 'Transaction Type' in the input row is present in the 
+        'SKIPSTRINGS' list. If it is, the function returns True, indicating that the line should 
+        be skipped. Otherwise, it returns False, indicating that the line is relevant.
+        """
         return self.input_row['Transaction Type'] in self.SKIPSTRINGS
 
     def get_input_string(self):
-        """Return the input data we are using"""
+        """
+        Return the input data we are using.
+
+        This method retrieves the original input data row that was used to initialize the 
+        CoinbaseParserCsv object. The input data is a dictionary where the keys represent 
+        the column names from the CSV file and the values represent the corresponding data 
+        for that column.
+
+        Parameters:
+        None
+
+        Returns:
+        dict: The original input data row as a dictionary.
+        """
         return self.input_row
 
     def get_date_string(self):
@@ -65,22 +86,30 @@ class CoinbaseParserCsv(ChainreportParserInterface):
 
     def get_received_amount(self):
         """Return amount of received coins"""
+        if self.get_transaction_type() == 'Withdrawal':
+            return ""
         return self.received_amount
 
     def get_received_currency(self):
         """Return currency of receveid coins"""
+        if self.get_transaction_type() == 'Withdrawal':
+            return ""
         return self.received_currency
 
     def get_sent_amount(self):
         """Return amount of sent coins"""
         if self.get_transaction_type() == 'Trade':
-            return self.sent_amount
+            return "-" + self.sent_amount
+        if self.get_transaction_type() == 'Withdrawal':
+            return "-" + self.received_amount
         return ""
 
     def get_sent_currency(self):
         """Return currency of sent coins"""
         if self.get_transaction_type() == 'Trade':
             return self.sent_currency
+        if self.get_transaction_type() == 'Withdrawal':
+            return self.received_currency
         return ""
 
     def get_transaction_fee_amount(self):
