@@ -7,6 +7,7 @@ from chainreport_parser.hi_parser_csv import HiParserCsv
 from chainreport_parser.hi_parser_pdf import HiParserPdf
 from chainreport_parser.plutus_parser_csv import PlutusParserCsv
 from chainreport_parser.nexo_parser_csv import NexoParserCsv
+from chainreport_parser.coinbase import CoinbaseParserCsv
 
 class ChainreportConverter():
     """Main Class handling the csv files (open, close) and the conversion of the content"""
@@ -40,6 +41,9 @@ class ChainreportConverter():
             self.inputtype = "csv"
         elif parsertype == "Nexo":
             self.parser = NexoParserCsv
+            self.inputtype = "csv"
+        elif parsertype == "Coinbase":
+            self.parser = CoinbaseParserCsv
             self.inputtype = "csv"
         else:
             return
@@ -137,6 +141,13 @@ class ChainreportConverter():
         """Convert the input csv to a compatible chainreport file depending on the parser selection"""
 
         with open(self.input_filename, newline='', encoding="utf-8") as csvinput:
+            try:
+                for line in range(self.parser.SKIPINITIALLINES):
+                    csvinput.readline()
+            except AttributeError:
+                # Expected behaviour for csv files without useless content in the first lines
+                _logging_callback("")
+
             reader = csv.DictReader(csvinput, delimiter=self.parser.DELIMITER)
 
             saved_linedata = None
@@ -151,7 +162,7 @@ class ChainreportConverter():
 
                 # Combine the multiline trade transaction (if there is still a next line left)
                 if (current_linedata.get_description() in self.parser.TRADETRANSACTION
-                        and self.parser == HiParserCsv):
+                        and self.parser in [HiParserCsv]):
                     # Store current (first) line of the multiline transaction
                     if not saved_linedata:
                         saved_linedata = current_linedata
@@ -165,10 +176,7 @@ class ChainreportConverter():
                 if current_linedata.get_description() in self.parser.WITHDRAWTRANSACTION:
                     if saved_withdrawdata:
                         self.write_row(csv_writer, saved_withdrawdata, _logging_callback)
-                        if _logging_callback:
-                            _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
-                                                    ". The amount is 0 in the export file.")
-                        self.statistics["warnings"] += 1
+                        self.log_warning(_logging_callback)
                     saved_withdrawdata = current_linedata
                     continue
 
@@ -183,17 +191,34 @@ class ChainreportConverter():
         # Write all stored lines at the end as well
         if saved_withdrawdata:
             self.write_row(csv_writer, saved_withdrawdata, _logging_callback)
-            if _logging_callback:
-                _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
-                                        ". The amount is 0 in the export file.")
-            self.statistics["warnings"] += 1
+            self.log_warning(_logging_callback)
         if saved_linedata:
-            if _logging_callback:
-                _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
-                                        ". A multi-line transaction only had 1 line")
-            self.statistics["errors"] += 1
+            self.log_error(saved_linedata, _logging_callback)
 
         csvinput.close()
+
+    def log_warning(self, _logging_callback):
+        """
+        Log a warning message if the amount is 0 in the export file.
+
+        Parameters:
+        _logging_callback (function): A callback function to handle logging. If None, no logging is performed.
+
+        Returns:
+        None
+
+        Raises:
+        None
+
+        The function checks if the parser is HiParserCsv and if a logging callback function is provided.
+        If both conditions are met, it logs a warning message indicating the line number where the amount is 0.
+        It also increments the warning count in the statistics dictionary.
+        """
+        if self.parser == HiParserCsv:
+            if _logging_callback:
+                _logging_callback("Please fix the line " + str(self.statistics["output_linecount"]) +
+                                    ". The amount is 0 in the export file.")
+            self.statistics["warnings"] += 1
 
 
     def convert(self, _logging_callback = None):
