@@ -31,6 +31,7 @@ class TestCoinbaseParserCsv:
             'Transaction Type': 'Deposit'
         }
         with pytest.raises(ValueError):
+            # pylint: disable=unused-variable
             parser = CoinbaseParserCsv(row)
 
     # Correctly identifies unknown transaction type as ERROR
