@@ -3,3 +3,4 @@ kivy[base]
 PyPDF2
 pylint
 pytest
+pytest-cov
