@@ -1,6 +1,7 @@
 # chainreport-converter
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/nacrul-eth/chainreport-converter/blob/main/README.md)
 [![de](https://img.shields.io/badge/lang-de-green.svg)](https://github.com/nacrul-eth/chainreport-converter/blob/main/README.de.md)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/defb99bf113c42569e424afb71ba57da)](https://app.codacy.com/gh/nacrul-eth/chainreport-converter/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 Converter tools for <https://chain.report/> in collaboration with <https://kryptowoelfe.de/>
 
