@@ -42,9 +42,6 @@ class ChainreportConverter():
         elif parsertype == "Nexo":
             self.parser = NexoParserCsv
             self.inputtype = "csv"
-        elif parsertype == "Coinbase Pro":
-            self.parser = CoinbaseProParserCsv
-            self.inputtype = "csv"
         elif parsertype == "Coinbase":
             self.parser = CoinbaseParserCsv
             self.inputtype = "csv"
@@ -165,7 +162,7 @@ class ChainreportConverter():
 
                 # Combine the multiline trade transaction (if there is still a next line left)
                 if (current_linedata.get_description() in self.parser.TRADETRANSACTION
-                        and self.parser in [HiParserCsv, CoinbaseProParserCsv]):
+                        and self.parser in [HiParserCsv]):
                     # Store current (first) line of the multiline transaction
                     if not saved_linedata:
                         saved_linedata = current_linedata
