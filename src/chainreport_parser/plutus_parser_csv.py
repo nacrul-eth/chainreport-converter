@@ -39,7 +39,9 @@ class PlutusParserCsv(ChainreportParserInterface):
 
     def get_transaction_type(self):
         """Return transaction type in Chainreport format"""
-        transaction_description = self.input_row['type']
+        transaction_description = self.input_row.get('type', 'ERROR')
+        if isinstance(transaction_description, str):
+            transaction_description = transaction_description.upper().strip()
         return_string = 'ERROR'
         if transaction_description in PlutusParserCsv.CASHBACKTRANSACTION:
             return_string = 'Cashback'
@@ -47,7 +49,13 @@ class PlutusParserCsv(ChainreportParserInterface):
 
     def get_received_amount(self):
         """Return amount of received coins"""
-        return self.input_row['reward_plu_value'].replace(".", ",")
+        receive_amount = self.input_row['reward_plu_value']
+        if receive_amount is None:
+            raise KeyError('reward_plu_value')
+        if isinstance(receive_amount, str):
+            receive_amount = receive_amount.strip()
+        receive_amount = receive_amount.replace(".", ",")
+        return receive_amount
 
     def get_received_currency(self):
         """Return currency of receveid coins"""
