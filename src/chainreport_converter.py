@@ -165,7 +165,7 @@ class ChainreportConverter():
 
                 # Combine the multiline trade transaction (if there is still a next line left)
                 if (current_linedata.get_description() in self.parser.TRADETRANSACTION
-                        and (self.parser in [HiParserCsv, KrakenParserCsv])):
+                        and self.parser in [HiParserCsv, KrakenParserCsv]:
                     # Store current (first) line of the multiline transaction
                     if not saved_linedata:
                         saved_linedata = current_linedata
