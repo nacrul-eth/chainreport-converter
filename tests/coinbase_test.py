@@ -1,5 +1,5 @@
 import pytest
-from src.chainreport_parser.coinbase import CoinbaseParserCsv
+from chainreport_parser.coinbase_parser_csv import CoinbaseParserCsv
 
 class TestGetInputString:
 
