@@ -11,6 +11,7 @@ class HiParserCsv(ChainreportParserInterface):
 
     NAME = __qualname__
     DELIMITER=","
+    SKIPINITIALLINES=0
     CASHBACKTRANSACTION = ['HI rebate']
     DEPOSITTRANSACTION = ['Crypto deposit',
                           'crypto receive',

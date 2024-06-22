@@ -11,6 +11,7 @@ class PlutusParserCsv(ChainreportParserInterface):
 
     NAME = __qualname__
     DELIMITER="|"
+    SKIPINITIALLINES=0
     CASHBACKTRANSACTION = ['DAILY_REBATE_DISTRIBUTION',
                            'REBATE_BONUS']   # user for manual rebates (positive & negative)
     DEPOSITTRANSACTION = []
