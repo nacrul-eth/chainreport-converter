@@ -451,7 +451,7 @@ class TestGetReceivedAmount:
         }
         parser = HiParserCsv(input_row)
         received_amount = parser.get_received_amount()
-    
+
         assert received_amount == 'non-numeric'
 
     def test_hi_parser_csv_negative_received_amount(self):
@@ -468,7 +468,7 @@ class TestGetReceivedAmount:
         }
         parser = HiParserCsv(input_row)
         received_amount = parser.get_received_amount()
-    
+
         assert received_amount == '-100'
 
     def test_get_received_amount_handles_leading_zeros_correctly(self):
@@ -487,7 +487,7 @@ class TestGetReceivedAmount:
         received_amount = parser.get_received_amount()
 
         assert received_amount == '00100,00'
-    
+
     def test_get_received_amount_trailing_zeros(self):
         input_row = {
             'Received Amount': '100.00',
@@ -501,7 +501,7 @@ class TestGetReceivedAmount:
         }
         parser = HiParserCsv(input_row)
         received_amount = parser.get_received_amount()
-    
+
         assert received_amount == '100,00'
 
     def test_get_received_amount_with_decimal_places(self):
@@ -517,7 +517,7 @@ class TestGetReceivedAmount:
         }
         parser = HiParserCsv(input_row)
         received_amount = parser.get_received_amount()
-    
+
         assert received_amount == '123,45'
 
     def test_get_received_amount_handles_leading_and_trailing_spaces(self):
@@ -526,7 +526,7 @@ class TestGetReceivedAmount:
         }
         parser = HiParserCsv(input_row)
         received_amount = parser.get_received_amount()
-    
+
         assert received_amount == '100,00'
 
     def test_get_received_amount_handles_multiple_consecutive_spaces_correctly(self):
@@ -541,7 +541,7 @@ class TestGetReceivedAmount:
         }
         parser = HiParserCsv(input_row)
         received_amount = parser.get_received_amount()
-    
+
         assert received_amount == '100,00'
 
     def test_get_received_amount_handles_non_alphanumeric_characters_correctly(self):
@@ -570,6 +570,12 @@ class TestGetReceivedAmount:
         received_amount = parser.get_received_amount()
 
         assert received_amount == '100,50'
+
+    # Handles cases where 'Received Amount' key is missing in the input row
+    def test_handles_missing_sent_currency_key(self):
+        input_row = {}
+        parser = HiParserCsv(input_row)
+        assert parser.get_received_amount() == ''
 
 class TestGetReceivedCurrency:
 
