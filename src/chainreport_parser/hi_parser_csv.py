@@ -73,7 +73,7 @@ class HiParserCsv(ChainreportParserInterface):
         if 'Description' not in self.input_row:
             return False
         if (self.input_row.get('Description', 'ERROR').strip() in self.SKIPSTRINGS or
-            self.input_row.get('Description', 'ERROR').strip() == ""):
+                self.input_row.get('Description', 'ERROR').strip() == ""):
             return True
         return False
 
