@@ -27,10 +27,11 @@ jobs:
       working-directory: .
     - name: Build with pyinstaller for windows
       run: python -m PyInstaller windows_app.spec
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: 'chain.report converter'
         path: 'dist/chain.report converter.exe'
+        overwrite: true
     - name: Create Release file
       run: echo ${{ github.sha }} > Release.txt
     - name: Release
