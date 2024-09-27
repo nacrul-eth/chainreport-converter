@@ -86,8 +86,10 @@ class PlutusParserCsv(ChainreportParserInterface):
 
         This function extracts the date and time from the input row, which contains transaction data.
         It checks for two possible keys: 'createdAt' and 'date'.
-        If 'createdAt' is present, it assumes the date and time are in ISO 8601 format and converts it to the desired format.
-        If 'createdAt' is not present but 'date' is present, it tries to convert the date and time to the desired format.
+        If 'createdAt' is present, it assumes the date and time are in ISO 8601 format and
+        converts it to the desired format.
+        If 'createdAt' is not present but 'date' is present,
+        it tries to convert the date and time to the desired format.
         If neither 'createdAt' nor 'date' is present, it returns an empty string.
 
         Parameters:
@@ -102,8 +104,7 @@ class PlutusParserCsv(ChainreportParserInterface):
         if 'createdAt' in self.input_row:
             transaction_time = datetime.strptime(self.input_row['createdAt'], '%Y-%m-%dT%H:%M:%S.%fZ')
             return transaction_time.strftime('%d.%m.%Y %H:%M')
-        else:
-            raise KeyError("missing required field 'createdAt'")
+        raise KeyError("missing required field 'createdAt'")
 
     def get_transaction_type(self) -> str:
         """
@@ -118,8 +119,8 @@ class PlutusParserCsv(ChainreportParserInterface):
 
         Returns:
         -----------
-        str: The transaction type in Chainreport format. If the transaction type is found in the cashback transaction types,
-             it returns 'Cashback'. Otherwise, it returns 'ERROR'.
+        str: The transaction type in Chainreport format. If the transaction type is found in the
+             cashback transaction types, it returns 'Cashback'. Otherwise, it returns 'ERROR'.
         """
         transaction_description = self.input_row.get('type', 'ERROR')
         if isinstance(transaction_description, str):
@@ -136,8 +137,10 @@ class PlutusParserCsv(ChainreportParserInterface):
         It checks for two possible keys: 'reward_plu_value' and 'plu_amount'.
         If 'reward_plu_value' is present, it assigns its value to 'receive_amount'.
         If 'reward_plu_value' is not present but 'plu_amount' is present, it assigns its value to 'receive_amount'.
-        If neither 'reward_plu_value' nor 'plu_amount' is present, it raises a KeyError with the message 'reward_plu_value'.
-        After assigning the value to 'receive_amount', it checks if it is a string and removes any leading/trailing whitespaces.
+        If neither 'reward_plu_value' nor 'plu_amount' is present,
+        it raises a KeyError with the message 'reward_plu_value'.
+        After assigning the value to 'receive_amount',
+        it checks if it is a string and removes any leading/trailing whitespaces.
         Finally, it replaces any decimal points with commas and returns the 'receive_amount'.
 
         Parameters:
@@ -203,10 +206,9 @@ class PlutusParserCsv(ChainreportParserInterface):
         """
         if 'statement_id' in self.input_row:
             return self.input_row.get('statement_id', '')
-        elif 'exchange_rate_id' in self.input_row:
+        if 'exchange_rate_id' in self.input_row:
             return self.input_row.get('exchange_rate_id','')
-        else:
-            return ''
+        return ''
 
     def get_description(self) -> str:
         """
@@ -229,7 +231,6 @@ class PlutusParserCsv(ChainreportParserInterface):
         """
         if 'clean_description' in self.input_row:
             return self.input_row.get('clean_description','')
-        elif 'description' in self.input_row:
+        if 'description' in self.input_row:
             return self.input_row.get('description','')
-        else:
-            return ''
+        return ''
