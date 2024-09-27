@@ -19,6 +19,7 @@ class HiParserPdf(ChainreportParserInterface):
 
     # pylint: disable=duplicate-code
     NAME = __qualname__
+    SKIPINITIALLINES=0
     CASHBACKTRANSACTION = ['HI rebate']
     DEPOSITTRANSACTION = ['Crypto deposit',
                           'crypto receive',

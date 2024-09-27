@@ -575,7 +575,7 @@ class TestGetReceivedAmount:
         }
         parser = PlutusParserCsv(row)
         with pytest.raises(KeyError):
-            parser.get_received_amount().replace(",", ".")
+            parser.get_received_amount()
 
     # processes input row where 'reward_plu_value' is a very large number
     def test_large_received_amount(self):
