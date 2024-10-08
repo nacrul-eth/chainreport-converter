@@ -21,7 +21,7 @@ Alternativly you can create a chainreport csv-file by executing the following co
 Currently the following exchanges/blockchains are supported:
 
 - Hi (<https://hi.com>): CSV Original, but limited version (No withdraw amounts in the Hi statement) or New, PDF based version with all transactions supported
-- Plutus (<https://plutus.it>): Csv Rewards export only using the Plutus Dashboard extension as described in the [Wiki](https://github.com/nacrul-eth/chainreport-converter/wiki/PlutusParserCsv)
+- Plutus (<https://plutus.it>): Csv Rewards export only. Using the Plutus Dashboard extension as described in the [Wiki](https://github.com/nacrul-eth/chainreport-converter/wiki/PlutusParserCsv) or via the newly provided plutus_csv_export.js file from the repository.
 
 
 For additional blockchain/exchange support please open a github-ticket or join the kryptowoelfe telegram (german crypto community) 
