@@ -160,7 +160,6 @@ class PlutusParserCsv(ChainreportParserInterface):
             raise KeyError("missing amount or reward_plu_value")
         if isinstance(receive_amount, str):
             receive_amount = receive_amount.strip()
-
         receive_amount = receive_amount.replace(".", ",")
         return receive_amount
 
@@ -186,14 +185,17 @@ class PlutusParserCsv(ChainreportParserInterface):
 
     def get_order_id(self) -> str:
         """
-        Retrieve the order ID of the exchange transaction.
+        Retrieve the order ID from the transaction data.
 
-        This function extracts the order ID from the input row, which contains transaction data.
-        It checks for two possible keys: 'statement_id' and 'original_transaction_id'.
-        If 'statement_id' is present, it returns the value of 'statement_id'.
-        If 'statement_id' is not present but 'original_transaction_id' is present,
-            it returns the value of 'original_transaction_id'.
-        If neither 'statement_id' nor 'original_transaction_id' is present, it returns an empty string.
+        This function extracts the order ID from the input row, which contains transaction details.
+        It checks for two possible keys: 'statement_id' and 'exchange_rate_id'.
+        If 'statement_id' is present, it assigns its value to 'order_id'.
+        If 'statement_id' is not present but 'exchange_rate_id' is present, it assigns its value to 'order_id'.
+        If neither 'statement_id' nor 'exchange_rate_id' is present,
+        it raises a KeyError with the message 'missing statement_id or exchange_rate_id'.
+        After assigning the value to 'order_id',
+        it checks if it is a string and removes any leading/trailing whitespaces.
+        Finally, it returns the 'order_id'.
 
         Parameters:
         -----------
@@ -201,14 +203,21 @@ class PlutusParserCsv(ChainreportParserInterface):
 
         Returns:
         -----------
-        str: The order ID of the exchange transaction. If 'statement_id' or 'original_transaction_id' is not present,
-             returns an empty string.
+        str: The order ID of the transaction. If 'statement_id' or 'exchange_rate_id' is not present,
+             raises a KeyError.
         """
+        order_id = None
         if 'statement_id' in self.input_row:
-            return self.input_row.get('statement_id', '')
-        if 'exchange_rate_id' in self.input_row:
-            return self.input_row.get('exchange_rate_id','')
-        return ''
+            order_id = self.input_row.get('statement_id', '')
+        elif 'exchange_rate_id' in self.input_row:
+            order_id = self.input_row.get('exchange_rate_id','')
+        if order_id is None:
+            raise KeyError("missing statement_id or exchange_rate_id")
+        if isinstance(order_id, str):
+            order_id = order_id.strip()
+        else:
+            order_id = ''
+        return order_id
 
     def get_description(self) -> str:
         """
@@ -229,8 +238,15 @@ class PlutusParserCsv(ChainreportParserInterface):
         str: The description of the transaction. If 'clean_description' or 'description' is not present,
              returns an empty string.
         """
+        description = None
         if 'clean_description' in self.input_row:
-            return self.input_row.get('clean_description','')
-        if 'description' in self.input_row:
-            return self.input_row.get('description','')
-        return ''
+            description  = self.input_row.get('clean_description','')
+        elif 'description' in self.input_row:
+            description = self.input_row.get('description','')
+        if description is None:
+            raise KeyError("missing clean_description or description")
+        if isinstance(description, str):
+            description = description.strip()
+        else:
+            description = ''
+        return description

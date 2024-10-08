@@ -1,4 +1,4 @@
-javascript: (async function () {
+(async function () {
     class Plutus {
         async #request(method, url, bodyParams = {}, returnType = null) {
             if (["get", "post", "put", "patch", "delete"].includes(method)) {

@@ -508,7 +508,6 @@ class TestGetTransactionType:
         parser = PlutusParserCsv(row)
         assert parser.get_transaction_type() == 'ERROR'
 
-
 class TestGetReceivedAmount:
 
     # correctly parses and returns the received amount with a comma as decimal separator
@@ -631,3 +630,180 @@ class TestGetReceivedAmount:
         }
         parser = PlutusParserCsv(row)
         assert parser.get_received_amount() == "10,50"
+
+class TestGetOrderId:
+
+    # Returns 'statement_id' when present in input_row
+    def test_returns_statement_id_when_present(self):
+        input_row = {'statement_id': '12345'}
+        parser = PlutusParserCsv(input_row)
+        assert parser.get_order_id() == '12345'
+
+    # Handles input_row with additional unexpected keys gracefully
+    def test_handles_unexpected_keys_gracefully(self):
+        input_row = {'unexpected_key': 'value', 'statement_id': '67890'}
+        parser = PlutusParserCsv(input_row)
+        assert parser.get_order_id() == '67890'
+
+    # Processes input_row with only 'exchange_rate_id' correctly
+    def test_processes_input_row_with_only_exchange_rate_id_correctly(self):
+        row = {
+            'exchange_rate_id': '9876543210'
+        }
+        parser = PlutusParserCsv(row)
+        assert parser.get_order_id() == '9876543210'
+
+    # Returns an empty string when neither 'statement_id' nor 'exchange_rate_id' are present
+    def test_returns_empty_string_when_neither_statement_id_nor_exchange_rate_id_present(self):
+        input_row = {}
+        parser = PlutusParserCsv(input_row)
+        with pytest.raises(KeyError):
+            parser.get_order_id()
+
+    # Processes input_row with mixed data types for keys
+    def test_processes_mixed_data_types(self):
+        row = {
+            'createdAt': '2023-01-01T12:00:00.000Z',
+            'reward_plu_value': 10.50,
+            'description': 'DAILY_REBATE_DISTRIBUTION',
+            'statement_id': '0987654321'
+        }
+        parser = PlutusParserCsv(row)
+        assert parser.get_order_id() == "0987654321"
+
+    # Handles large input_row dictionaries efficiently
+    def test_handles_large_input_row(self):
+        row = {
+            'statement_id': '1234567890',
+            'test_key': '9876543210',
+            'other_key': 'other_value'
+        }
+        parser = PlutusParserCsv(row)
+        assert parser.get_order_id() == '1234567890'
+
+    # Processes input_row with nested dictionaries
+    def test_processes_input_row_with_nested_dictionaries(self):
+        row = {
+            'statement_id': '1234567890',
+            'original_transaction_id': '0987654321'
+        }
+        parser = PlutusParserCsv(row)
+        assert parser.get_order_id() == '1234567890'
+
+    # Handles input_row with non-string values for 'statement_id' and 'exchange_rate_id'
+    def test_handles_non_string_values(self):
+        row = {
+            'statement_id': 123,  # non-string value
+            'other_string': 456  # non-string value
+        }
+        parser = PlutusParserCsv(row)
+        assert parser.get_order_id() == ''
+
+class TestGetDescription:
+
+    # Returns 'clean_description' when present in input_row
+    def test_returns_clean_description(self):
+        row = {
+            'clean_description': 'Transaction for groceries',
+            'description': 'Grocery shopping'
+        }
+        parser = PlutusParserCsv(row)
+        assert parser.get_description() == 'Transaction for groceries'
+
+    # Raises KeyError if neither 'clean_description' nor 'description' is present
+    def test_raises_key_error_when_no_description(self):
+        row = {}
+        parser = PlutusParserCsv(row)
+        with pytest.raises(KeyError, match="missing clean_description or description"):
+            parser.get_description()
+
+    # Handles input_row with empty strings for 'clean_description' and 'description'
+    def test_handles_empty_strings(self):
+        row = {
+            'clean_description': '',
+            'description': ''
+        }
+        parser = PlutusParserCsv(row)
+        assert parser.get_description() == ''
+
+    # Handles input_row with non-string description values by returning an empty string
+    def test_handles_non_string_description(self):
+        # Prepare
+        row = {
+            'clean_description': 12345,
+            'description': 67890
+        }
+        parser = PlutusParserCsv(row)
+    
+        # Assert
+        assert parser.get_description() == ''
+
+    # Strips leading and trailing whitespaces from the description
+    def test_strips_whitespaces_from_description(self):
+        row = {
+            'clean_description': '  Test Description  ',
+            'description': '  Another Description  '
+        }
+        parser = PlutusParserCsv(row)
+        assert parser.get_description() == "Test Description"
+
+    # Returns 'description' when 'clean_description' is absent but 'description' is present
+    def test_returns_description_when_clean_description_absent(self):
+        row = {
+            'description': 'Transaction Description',
+            'statement_id': '1234567890'
+        }
+        parser = PlutusParserCsv(row)
+        assert parser.get_description() == 'Transaction Description'
+
+    # Handles input_row with both 'clean_description' and 'description' present, prioritizing 'clean_description'
+    def test_handles_both_clean_description_and_description(self):
+        row = {
+            'clean_description': 'Clean Description',
+            'description': 'Description'
+        }
+        parser = PlutusParserCsv(row)
+        assert parser.get_description() == 'Clean Description'
+
+    # Handles input_row with 'clean_description' or 'description' containing only whitespace
+    def test_handles_whitespace_description(self):
+        # Initialize the class object
+        row = {
+            'clean_description': '   ',
+            'description': '  ',
+        }
+        parser = PlutusParserCsv(row)
+        assert parser.get_description() == ''
+
+    # Handles input_row with 'clean_description' or 'description' containing special characters
+    def test_handles_special_characters(self):
+        row = {
+            'clean_description': 'Special !@#$%^&* Characters',
+            'description': 'Another Description',
+            'amount': '100.00'
+        }
+        parser = PlutusParserCsv(row)
+        assert parser.get_description() == 'Special !@#$%^&* Characters'
+
+    # Handles input_row with 'clean_description' or 'description' containing numeric values
+    def test_handles_numeric_description(self):
+        row = {
+            'clean_description': 12345,
+            'description': '98765'
+        }
+        parser = PlutusParserCsv(row)
+        assert parser.get_description() == ""
+
+    # Handles input_row with additional unexpected keys without affecting output
+    def test_handles_additional_keys(self):
+        # Prepare input row with additional unexpected keys
+        row = {
+            'createdAt': '2023-01-01T12:00:00.000Z',
+            'reward_plu_value': '10.50',
+            'description': 'DAILY_REBATE_DISTRIBUTION',
+            'statement_id': '1234567890',
+            'unexpected_key1': 'value1',
+            'unexpected_key2': 'value2'
+        }
+        parser = PlutusParserCsv(row)
+        assert parser.get_description() == "DAILY_REBATE_DISTRIBUTION"
