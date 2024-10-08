@@ -78,5 +78,4 @@ javascript: (async function () {
     }
     const plu = new Plutus;
     plu.downloadRewardsCsv();
-    plu.downloadStatementsCsv();
 })();
