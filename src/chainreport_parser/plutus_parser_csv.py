@@ -55,8 +55,8 @@ class PlutusParserCsv(ChainreportParserInterface):
         -----------
         bool: True if the transaction line should be skipped, False otherwise.
         """
-        if 'type' not in self.input_row:
-            return False
+        if 'type' not in self.input_row or self.input_row['type'] is None:
+            raise KeyError("missing required field 'type'")
         if (self.input_row.get('type', 'ERROR').strip() in self.SKIPSTRINGS or
                 self.input_row.get('type', 'ERROR').strip() == ""):
             return True

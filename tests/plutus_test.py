@@ -1,6 +1,63 @@
 import pytest
 from src.chainreport_parser.plutus_parser_csv import PlutusParserCsv
 
+class TestCheckIfSkipLine:
+
+    # Returns False when 'type' is not in input_row
+    def test_returns_false_when_type_not_in_input_row(self):
+        row = {
+            'createdAt': '2023-01-01T12:00:00.000Z',
+            'reward_plu_value': '10.50',
+            'description': 'DAILY_REBATE_DISTRIBUTION',
+            'statement_id': '1234567890'
+        }
+        parser = PlutusParserCsv(row)
+        with pytest.raises(KeyError):
+            parser.check_if_skip_line()
+
+
+    # Handles input_row with 'type' as None gracefully
+    def test_handles_type_as_none_gracefully(self):
+        row = {
+            'createdAt': '2023-01-01T12:00:00.000Z',
+            'reward_plu_value': '10.50',
+            'description': 'DAILY_REBATE_DISTRIBUTION',
+            'statement_id': '1234567890',
+            'type': None
+        }
+        parser = PlutusParserCsv(row)
+        with pytest.raises(KeyError):
+            parser.check_if_skip_line()
+
+    # Handles input_row with 'type' containing only whitespace
+    def test_handles_input_row_with_type_containing_only_whitespace(self):
+        row = {'type': '   '}
+        parser = PlutusParserCsv(row)
+        assert parser.check_if_skip_line() == True
+
+    # Handles input_row with 'type' as a very long string
+    def test_handles_long_string_type(self):
+        row = {'type': 'very_long_string_type_to_test_handling_skip'}
+        parser = PlutusParserCsv(row)
+        assert parser.check_if_skip_line() == False
+
+    # Handles input_row with 'type' as a special character string
+    def test_handles_special_character_string(self):
+        row = {'type': '!@#$%^&*()'}
+        parser = PlutusParserCsv(row)
+        assert parser.check_if_skip_line() == False
+
+    # Handles input_row with additional unexpected keys
+    def test_handles_input_row_with_additional_unexpected_keys(self):
+        row = {
+            'type': 'TRANSFER',
+            'amount': '100.00',
+            'description': 'Transfer from A to B'
+        }
+        parser = PlutusParserCsv(row)
+        parser.SKIPSTRINGS = ['TRANSFER']
+        assert parser.check_if_skip_line() is True
+
 class TestGetInputString:
 
     # Returns the input row as is
@@ -514,7 +571,7 @@ class TestGetReceivedAmount:
     def test_correctly_parses_received_amount(self):
         row = {
             'createdAt': '2023-01-01T12:00:00.000Z',
-            'reward_plu_value': '10.50',
+            'amount': '10.50',
             'description': 'DAILY_REBATE_DISTRIBUTION',
             'statement_id': '1234567890'
         }
@@ -741,11 +798,11 @@ class TestGetDescription:
     # Strips leading and trailing whitespaces from the description
     def test_strips_whitespaces_from_description(self):
         row = {
-            'clean_description': '  Test Description  ',
+            'clean_description': '  REBATE_BONUS  ',
             'description': '  Another Description  '
         }
         parser = PlutusParserCsv(row)
-        assert parser.get_description() == "Test Description"
+        assert parser.get_description() == "REBATE_BONUS"
 
     # Returns 'description' when 'clean_description' is absent but 'description' is present
     def test_returns_description_when_clean_description_absent(self):

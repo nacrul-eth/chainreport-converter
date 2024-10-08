@@ -27,15 +27,6 @@
         #post(url, bodyParams, returnType) {
             return this.#request("post", url, bodyParams, returnType);
         }
-        #put(url, bodyParams, returnType) {
-            return this.#request("put", url, bodyParams, returnType);
-        }
-        #delete(url, bodyParams, returnType) {
-            return this.#request("delete", url, bodyParams, returnType);
-        }
-        #patch(url, bodyParams, returnType) {
-            return this.#request("patch", url, bodyParams, returnType);
-        }
         async getRewards() {
             return this.#get("https://api.plutus.it/platform/transactions/pluton", "json");
         }
