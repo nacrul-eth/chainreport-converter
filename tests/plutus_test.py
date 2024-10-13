@@ -758,26 +758,26 @@ class TestGetOrderId:
 
 class TestGetDescription:
 
-    # Returns 'clean_description' when present in input_row
-    def test_returns_clean_description(self):
+    # Returns 'reference_type' when present in input_row
+    def test_returns_reference_type(self):
         row = {
-            'clean_description': 'Transaction for groceries',
+            'reference_type': 'Transaction for groceries',
             'description': 'Grocery shopping'
         }
         parser = PlutusParserCsv(row)
         assert parser.get_description() == 'Transaction for groceries'
 
-    # Raises KeyError if neither 'clean_description' nor 'description' is present
+    # Raises KeyError if neither 'reference_type' nor 'description' is present
     def test_raises_key_error_when_no_description(self):
         row = {}
         parser = PlutusParserCsv(row)
-        with pytest.raises(KeyError, match="missing clean_description or description"):
+        with pytest.raises(KeyError, match="missing reference_type or description"):
             parser.get_description()
 
-    # Handles input_row with empty strings for 'clean_description' and 'description'
+    # Handles input_row with empty strings for 'reference_type' and 'description'
     def test_handles_empty_strings(self):
         row = {
-            'clean_description': '',
+            'reference_type': '',
             'description': ''
         }
         parser = PlutusParserCsv(row)
@@ -787,7 +787,7 @@ class TestGetDescription:
     def test_handles_non_string_description(self):
         # Prepare
         row = {
-            'clean_description': 12345,
+            'reference_type': 12345,
             'description': 67890
         }
         parser = PlutusParserCsv(row)
@@ -798,14 +798,14 @@ class TestGetDescription:
     # Strips leading and trailing whitespaces from the description
     def test_strips_whitespaces_from_description(self):
         row = {
-            'clean_description': '  REBATE_BONUS  ',
+            'reference_type': '  REBATE_BONUS  ',
             'description': '  Another Description  '
         }
         parser = PlutusParserCsv(row)
         assert parser.get_description() == "REBATE_BONUS"
 
-    # Returns 'description' when 'clean_description' is absent but 'description' is present
-    def test_returns_description_when_clean_description_absent(self):
+    # Returns 'description' when 'reference_type' is absent but 'description' is present
+    def test_returns_description_when_reference_type_absent(self):
         row = {
             'description': 'Transaction Description',
             'statement_id': '1234567890'
@@ -813,39 +813,39 @@ class TestGetDescription:
         parser = PlutusParserCsv(row)
         assert parser.get_description() == 'Transaction Description'
 
-    # Handles input_row with both 'clean_description' and 'description' present, prioritizing 'clean_description'
-    def test_handles_both_clean_description_and_description(self):
+    # Handles input_row with both 'reference_type' and 'description' present, prioritizing 'reference_type'
+    def test_handles_both_reference_type_and_description(self):
         row = {
-            'clean_description': 'Clean Description',
+            'reference_type': 'Reference Type',
             'description': 'Description'
         }
         parser = PlutusParserCsv(row)
-        assert parser.get_description() == 'Clean Description'
+        assert parser.get_description() == 'Reference Type'
 
-    # Handles input_row with 'clean_description' or 'description' containing only whitespace
+    # Handles input_row with 'reference_type' or 'description' containing only whitespace
     def test_handles_whitespace_description(self):
         # Initialize the class object
         row = {
-            'clean_description': '   ',
+            'reference_type': '   ',
             'description': '  ',
         }
         parser = PlutusParserCsv(row)
         assert parser.get_description() == ''
 
-    # Handles input_row with 'clean_description' or 'description' containing special characters
+    # Handles input_row with 'reference_type' or 'description' containing special characters
     def test_handles_special_characters(self):
         row = {
-            'clean_description': 'Special !@#$%^&* Characters',
+            'reference_type': 'Special !@#$%^&* Characters',
             'description': 'Another Description',
             'amount': '100.00'
         }
         parser = PlutusParserCsv(row)
         assert parser.get_description() == 'Special !@#$%^&* Characters'
 
-    # Handles input_row with 'clean_description' or 'description' containing numeric values
+    # Handles input_row with 'reference_type' or 'description' containing numeric values
     def test_handles_numeric_description(self):
         row = {
-            'clean_description': 12345,
+            'reference_type': 12345,
             'description': '98765'
         }
         parser = PlutusParserCsv(row)

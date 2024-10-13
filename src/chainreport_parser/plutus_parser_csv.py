@@ -224,10 +224,10 @@ class PlutusParserCsv(ChainreportParserInterface):
         Return description of the transaction.
 
         This function retrieves the description of the transaction from the input row.
-        It checks for the 'clean_description' and 'description' keys in the input row.
-        If 'clean_description' is present, it returns the value of 'clean_description'.
-        If 'clean_description' is not present but 'description' is present, it returns the value of 'description'.
-        If neither 'clean_description' nor 'description' is present, it returns an empty string.
+        It checks for the 'reference_type' and 'description' keys in the input row.
+        If 'reference_type' is present, it returns the value of 'reference_type'.
+        If 'reference_type' is not present but 'description' is present, it returns the value of 'description'.
+        If neither 'reference_type' nor 'description' is present, it returns an empty string.
 
         Parameters:
         -----------
@@ -235,16 +235,16 @@ class PlutusParserCsv(ChainreportParserInterface):
 
         Returns:
         -----------
-        str: The description of the transaction. If 'clean_description' or 'description' is not present,
+        str: The description of the transaction. If 'reference_type' or 'description' is not present,
              returns an empty string.
         """
         description = None
-        if 'clean_description' in self.input_row:
-            description  = self.input_row.get('clean_description','')
+        if 'reference_type' in self.input_row:
+            description  = self.input_row.get('reference_type','')
         elif 'description' in self.input_row:
             description = self.input_row.get('description','')
         if description is None:
-            raise KeyError("missing clean_description or description")
+            raise KeyError("missing reference_type or description")
         if isinstance(description, str):
             description = description.strip()
         else:
