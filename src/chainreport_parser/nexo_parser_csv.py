@@ -11,6 +11,7 @@ class NexoParserCsv(ChainreportParserInterface):
 
     NAME = __qualname__
     DELIMITER=","
+    SKIPINITIALLINES=0
     CASHBACKTRANSACTION = ['Exchange Cashback']
     DEPOSITTRANSACTION = ['Deposit To Exchange',
                           'Top up Crypto']
