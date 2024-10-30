@@ -27,10 +27,10 @@ jobs:
         systemwidedeploy.cmd 1
       working-directory: .
     - name: Build with pyinstaller for windows
-      run: python -m PyInstaller --clean -F -n "chain.report converter - Python ${{ matrix.python-version }}.exe" windows_app.spec
+      run: python -m PyInstaller --clean windows_app.spec
     - uses: actions/upload-artifact@v4
       with:
-        name: 'chain.report converter'
+        name: 'chain.report converter - Python ${{ matrix.python-version }}.exe'
         path: 'dist/chain.report converter.exe'
         overwrite: true
     - name: Release
