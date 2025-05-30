@@ -23,7 +23,7 @@ jobs:
         pylint $(git ls-files '*.py')
     - name: Run tests and collect results & coverage
       run: | 
-        pytest --cov=./ --cov-report=coverage.xml --junitxml=report.xml
+        pytest --cov=./ --cov-report=xml --junitxml=report.xml
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.6.0
       with:
