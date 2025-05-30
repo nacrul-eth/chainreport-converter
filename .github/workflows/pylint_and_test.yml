@@ -21,11 +21,9 @@ jobs:
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files '*.py')
-    - name: Test with pytest
-      run: |
-        pytest
-    - name: Run tests and collect coverage
-      run: pytest --cov=./ --cov-report=xml
+    - name: Run tests and collect results & coverage
+      run: | 
+        pytest --cov=./ --cov-report=coverage.xml --junitxml=report.xml
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.6.0
       with:
@@ -42,7 +40,7 @@ jobs:
       uses: trunk-io/analytics-uploader@main
       with:
         # Path to your test results.
-        junit-paths: ./xunit.xml
+        junit-paths: ./report.xml
         # Provide your Trunk organization slug.
         org-slug: nacrul-eth
         # Provide your Trunk API token as a GitHub secret.
