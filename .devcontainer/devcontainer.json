@@ -18,6 +18,10 @@
             ]
         }
     },
+    // Load .gitconfig in case it is available
+    "mounts": [
+        "source=${localWorkspaceFolder}/../.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached"
+    ],
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     // "forwardPorts": [9000],
     // Use 'portsAttributes' to set default properties for specific forwarded ports. 
