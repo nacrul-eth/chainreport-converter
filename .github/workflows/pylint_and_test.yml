@@ -36,3 +36,15 @@ jobs:
       with:
         project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
         coverage-reports: ./coverage.xml
+    - name: Upload test results to Trunk
+      # Run this step even if the test step ahead fails
+      if: "!cancelled()"
+      uses: trunk-io/analytics-uploader@main
+      with:
+        # Path to your test results.
+        junit-paths: ./xunit.xml
+        # Provide your Trunk organization slug.
+        org-slug: nacrul-eth
+        # Provide your Trunk API token as a GitHub secret.
+        token: ${{ secrets.TRUNK_API_TOKEN }}
+      continue-on-error: true
